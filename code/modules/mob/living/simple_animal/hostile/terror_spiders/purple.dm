@@ -52,11 +52,13 @@
 
 /mob/living/simple_animal/hostile/poison/terror_spider/purple/ShowGuide()
 	..()
-	var/guidetext = "PURPLE TERROR guide:"
-	guidetext += "<BR>- You guard the nest of the all important Terror Queen! You are very robust, with a chance to stun on hit, but MUST stay with the queen at all times."
-	guidetext += "<BR>- <b>If the Queen dies, you die!</b>"
-	guidetext += "<BR>- <b>If you abandon the Queen, you die!</b>"
-	to_chat(src, guidetext)
+	var/list/guidelist = list()
+	guidelist += "PURPLE TERROR guide:"
+	guidelist += "- You guard the nest of the all important Terror Queen! You are very robust, with a chance to stun on hit, but MUST stay with the queen at all times."
+	guidelist += "- <b>If the Queen dies, you die!</b>"
+	guidelist += "- <b>If you abandon the Queen, you die!</b>"
+	to_chat(src, guidelist.Join("<BR>"))
+
 
 /mob/living/simple_animal/hostile/poison/terror_spider/purple/spider_specialattack(var/mob/living/carbon/human/L, var/poisonable)
 	if(cycles_noqueen < 6 && prob(10))

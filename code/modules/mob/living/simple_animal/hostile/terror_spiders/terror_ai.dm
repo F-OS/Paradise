@@ -379,23 +379,6 @@
 // --------------------- TERROR SPIDERS: MISC AI CODE -----------------------------
 // --------------------------------------------------------------------------------
 
-/mob/living/simple_animal/hostile/poison/terror_spider/proc/CheckFaction()
-	// If we're somehow being mind-controlled, resist or perish.
-	// Note: you cannot use if(faction == initial(faction)) here, because that ALWAYS returns true even when it shouldn't.
-	if(faction.len != 1 || (!("terrorspiders" in faction)) || master_commander != null)
-		// no, xenobiologists, you cannot have tame terror spiders to screw around with.
-		if(spider_tier >= 3)
-			// resist the mind control, revert all control variables to defaults
-			master_commander = null
-			faction = list("terrorspiders")
-			to_chat(src,"<span class='userdanger'>The shackles have fallen from your mind. Serve the Terror Spiders! You have no other master.</span>")
-			visible_message("<span class='danger'>[src] gets an evil look in its eyes!</span>")
-			msg_terrorspiders("[src] in [get_area(src)] has broken their mental shackles, and is ready to serve the hive.")
-		else
-			visible_message("<span class='danger'>[src] writhes in pain!</span>")
-			death()
-			gib()
-
 
 /mob/living/simple_animal/hostile/poison/terror_spider/proc/UnlockBlastDoors(var/target_id_tag, var/msg_to_send)
 	var/unlocked_something = 0

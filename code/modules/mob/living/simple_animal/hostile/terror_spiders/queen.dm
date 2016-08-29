@@ -423,21 +423,23 @@
 
 /mob/living/simple_animal/hostile/poison/terror_spider/queen/ShowGuide()
 	..()
-	var/guidetext = "<BR>QUEEN OF TERROR guide:"
-	guidetext += "<BR>- Your goal is to build a nest, Lay Eggs to make more spiders, and ultimately exterminate all non-spider life on the station!"
-	guidetext += "<BR>- You can use HiveCommand to issue orders to your spiders (both AI, and player-controlled)!"
-	guidetext += "<BR>- The success or failure of the entire hive depends on you, so whatever you do, <b>do not die!</b>"
-	guidetext += "<BR>- To start, find a safe, dark location to nest in, then lay some purple (praetorian) eggs so you will have guards to defend you.<BR>"
-	guidetext += "<BR>Queen of Terror Verbs:"
-	guidetext += "<BR> - HiveSense - Shows the names, statuses and locations of your brood's spiders."
-	guidetext += "<BR> - HiveCommand - Sets the rules of engagement for your brood - IE if they should attack bipeds or not."
-	guidetext += "<BR> - Kill Spider - Gibs a spider standing next to you. Can only be used once."
-	guidetext += "<BR> - Lay Queen Eggs - Lays eggs. Your BEST ability as Queen."
-	guidetext += "<BR> - Wrap - Wraps an object or corpse in a cocoon. Generally better left to greens."
-	guidetext += "<BR> - Hallucinate - Causes a random crew member on the same Z-level to start to hallucinate."
-	guidetext += "<BR> - Queen Screech - Breaks lights over a wide area. Can only be used once."
-	guidetext += "<BR> - Fake Spiderlings - Creates many spiderlings that don't grow up, but do sow terror amongst crew."
-	to_chat(src, guidetext)
+	var/list/guidelist = list()
+	guidelist += "QUEEN OF TERROR guide:"
+	guidelist += "- Your goal is to build a nest, Lay Eggs to make more spiders, and ultimately exterminate all non-spider life on the station!"
+	guidelist += "- You can use HiveCommand to issue orders to your spiders (both AI, and player-controlled)!"
+	guidelist += "- The success or failure of the entire hive depends on you, so whatever you do, <b>do not die!</b>"
+	guidelist += "- To start, find a safe, dark location to nest in, then lay some purple (praetorian) eggs so you will have guards to defend you.<BR>"
+	guidelist += "Queen of Terror Verbs:"
+	guidelist += " - HiveSense - Shows the names, statuses and locations of your brood's spiders."
+	guidelist += " - HiveCommand - Sets the rules of engagement for your brood - IE if they should attack bipeds or not."
+	guidelist += " - Kill Spider - Gibs a spider standing next to you. Can only be used once."
+	guidelist += " - Lay Queen Eggs - Lays eggs. Your BEST ability as Queen."
+	guidelist += " - Wrap - Wraps an object or corpse in a cocoon. Generally better left to greens."
+	guidelist += " - Hallucinate - Causes a random crew member on the same Z-level to start to hallucinate."
+	guidelist += " - Queen Screech - Breaks lights over a wide area. Can only be used once."
+	guidelist += " - Fake Spiderlings - Creates many spiderlings that don't grow up, but do sow terror amongst crew."
+	to_chat(src, guidelist.Join("<BR>"))
+
 
 /obj/item/projectile/terrorqueenspit
 	name = "poisonous spit"
