@@ -4,7 +4,7 @@
 // --------------------------------------------------------------------------------
 // -------------: ROLE: ambusher
 // -------------: AI: hides in vents, emerges when prey is near to kill it, then hides again. Intended to scare normal crew.
-// -------------: SPECIAL: invisible when on top of a vent, emerges when prey approaches or gets trapped in webs
+// -------------: SPECIAL: invisible when on top of a vent, emerges when prey approaches or gets trapped in webs. Bite silences targets.
 // -------------: TO FIGHT IT: shoot it through a window, or make it regret ambushing you
 // -------------: CONCEPT: http://tvtropes.org/pmwiki/pmwiki.php/Main/StealthExpert
 // -------------: SPRITES FROM: FoS, http://nanotrasen.se/phpBB3/memberlist.php?mode=viewprofile&u=386

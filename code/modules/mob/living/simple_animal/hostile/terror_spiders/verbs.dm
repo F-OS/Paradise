@@ -16,7 +16,7 @@
 	guidelist += "Verbs:"
 	guidelist += " - Show Guide - Shows this guide."
 	guidelist += " - Web - Spins a terror web. Non-spiders get trapped if they touch a web."
-	guidelist += " - Eat Corpse - Eat the corpse of a dead foe to boost your regeneration"
+	guidelist += " - Wrap - Wraps a nearby corpse or other object. Webbing a human boosts your health regeneration."
 	guidelist += "------------------------"
 	guidelist += " "
 	to_chat(src, guidelist.Join("<BR>"))
@@ -81,7 +81,7 @@
 
 
 /mob/living/simple_animal/hostile/poison/terror_spider/verb/Wrap()
-	set name = "Wrap Corpse"
+	set name = "Wrap"
 	set category = "Spider"
 	set desc = "Wrap up corpses (and possibly other ajacent objects)"
 	DoWrap()
@@ -94,7 +94,7 @@
 				if(L.stat == DEAD)
 					choices += L
 		for(var/obj/O in loc)
-			if(Adjacent(O))
+			if(Adjacent(O) && !O.anchored)
 				if(!istype(O, /obj/effect/spider/terrorweb) && !istype(O, /obj/effect/spider/cocoon))
 					choices += O
 		if(ckey)
@@ -129,8 +129,8 @@
 							continue
 						if(iscarbon(L))
 							regen_points += regen_points_per_kill
+							fed++
 						large_cocoon = 1
-						fed++
 						last_cocoon_object = 0
 						L.loc = C
 						C.pixel_x = L.pixel_x
@@ -139,7 +139,7 @@
 						break
 					if(large_cocoon)
 						C.icon_state = pick("cocoon_large1","cocoon_large2","cocoon_large3")
-			cocoon_target = null
-			busy = 0
-			stop_automated_movement = 0
+		cocoon_target = null
+		busy = 0
+		stop_automated_movement = 0
 
