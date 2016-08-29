@@ -17,7 +17,6 @@
 	spider_role_summary = "Adminbus spider"
 	ai_target_method = TS_DAMAGE_SIMPLE
 	altnames = list ("Terror Empress spider")
-	egg_name = "empress spider eggs"
 
 	icon_state = "terror_queen"
 	icon_living = "terror_queen"

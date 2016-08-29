@@ -287,26 +287,6 @@
 			obstacle.attack_animal(src)
 
 
-/mob/living/simple_animal/hostile/poison/terror_spider/proc/try_open_airlock(var/obj/machinery/door/airlock/D)
-	if(!D.density)
-		to_chat(src, "Closing doors does not help us.")
-	else if(D.welded)
-		to_chat(src, "The door is welded shut.")
-	else if(D.locked)
-		to_chat(src, "The door is bolted shut.")
-	else if(D.operating)
-	else if( (!istype(D.req_access) || !D.req_access.len) && (!istype(D.req_one_access) || !D.req_one_access.len) && (D.req_access_txt == "0") && (D.req_one_access_txt == "0") )
-		//visible_message("<span class='danger'>\the [src] opens the public-access door [D]!</span>")
-		D.open(1)
-	else if(D.arePowerSystemsOn() && (spider_opens_doors != 2))
-		to_chat(src, "The door's motors resist your efforts to force it.")
-	else if(!spider_opens_doors)
-		to_chat(src, "Your type of spider is not strong enough to force open doors.")
-	else
-		visible_message("<span class='danger'>\the [src] pries open the door!</span>")
-		playsound(src.loc, "sparks", 100, 1)
-		D.open(1)
-
 /mob/living/simple_animal/hostile/poison/terror_spider/proc/TSVentCrawlRandom(/var/entry_vent)
 	if(entry_vent)
 		if(get_dist(src, entry_vent) <= 2)

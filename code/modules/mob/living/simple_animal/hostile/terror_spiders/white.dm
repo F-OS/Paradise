@@ -14,7 +14,6 @@
 	desc = "An ominous-looking white spider, its ghostly eyes and vicious-looking fangs are the stuff of nightmares."
 	spider_role_summary = "Rare, bite-and-run spider that infects hosts with spiderlings"
 	ai_target_method = TS_DAMAGE_POISON
-	egg_name = "white spider eggs"
 
 	altnames = list("White Terror spider","White Death spider","Ghostly Nightmare spider")
 	icon_state = "terror_white"

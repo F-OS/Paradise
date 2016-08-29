@@ -14,7 +14,6 @@
 	desc = "An ominous-looking purple spider."
 	spider_role_summary = "Guards the nest of the Queen of Terror."
 	ai_target_method = TS_DAMAGE_BRUTE
-	egg_name = "purple spider eggs"
 	altnames = list("Praetorian spider")
 
 	icon_state = "terror_purple"

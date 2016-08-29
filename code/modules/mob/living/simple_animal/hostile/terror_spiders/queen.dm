@@ -14,7 +14,6 @@
 	desc = "An enormous, terrifying spider. Its egg sac is almost as big as its body, and teeming with spider eggs."
 	spider_role_summary = "Commander of the spider forces. Lays eggs, directs the brood."
 	ai_target_method = TS_DAMAGE_SIMPLE
-	egg_name = "queen spider eggs"
 
 	altnames = list("Queen of Terror","Brood Mother")
 	icon_state = "terror_queen"
@@ -343,12 +342,6 @@
 	else
 		to_chat(src, "Unrecognized egg type.")
 
-
-/mob/living/simple_animal/hostile/poison/terror_spider/queen/verb/Wrap()
-	set name = "Wrap"
-	set category = "Spider"
-	set desc = "Wrap up prey to feast upon and objects for safe keeping."
-	DoWrap()
 
 
 /mob/living/simple_animal/hostile/poison/terror_spider/queen/verb/QueenHallucinate()

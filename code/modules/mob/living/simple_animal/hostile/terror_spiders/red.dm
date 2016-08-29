@@ -14,7 +14,6 @@
 	name = "Red Terror spider"
 	desc = "An ominous-looking red spider, it has eight beady red eyes, and nasty, big, pointy fangs!"
 	altnames = list("Red Terror spider", "Crimson Terror spider", "Bloody Butcher spider")
-	egg_name = "red spider eggs"
 
 	spider_role_summary = "High health, high damage, very slow, melee juggernaut"
 	ai_target_method = TS_DAMAGE_BRUTE

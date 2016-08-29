@@ -15,7 +15,6 @@
 	altnames = list("Green Terror spider","Insidious Breeding spider","Fast Bloodsucking spider")
 	spider_role_summary = "Average melee spider that webs its victims and lays more spider eggs"
 	ai_target_method = TS_DAMAGE_BRUTE
-	egg_name = "green spider eggs"
 
 	icon_state = "terror_green"
 	icon_living = "terror_green"
@@ -25,14 +24,6 @@
 	melee_damage_lower = 10
 	melee_damage_upper = 20
 	ventcrawler = 1
-
-
-
-/mob/living/simple_animal/hostile/poison/terror_spider/green/verb/Wrap()
-	set name = "Wrap"
-	set category = "Spider"
-	set desc = "Wrap up prey to eat (allowing you to lay eggs) and objects (making them inaccessible to humans)."
-	DoWrap()
 
 
 /mob/living/simple_animal/hostile/poison/terror_spider/green/verb/LayGreenEggs()
@@ -51,11 +42,11 @@
 	else
 		visible_message("<span class='notice'>\The [src] begins to lay a cluster of eggs.</span>")
 		if(prob(33))
-			DoLayTerrorEggs(/mob/living/simple_animal/hostile/poison/terror_spider/red, 2, 1)
+			DoLayTerrorEggs(/mob/living/simple_animal/hostile/poison/terror_spider/red, 1, 1)
 		else if(prob(50))
-			DoLayTerrorEggs(/mob/living/simple_animal/hostile/poison/terror_spider/gray, 2, 1)
+			DoLayTerrorEggs(/mob/living/simple_animal/hostile/poison/terror_spider/gray, 1, 1)
 		else
-			DoLayTerrorEggs(/mob/living/simple_animal/hostile/poison/terror_spider/green, 2, 1)
+			DoLayTerrorEggs(/mob/living/simple_animal/hostile/poison/terror_spider/green, 1, 1)
 		fed--
 
 /mob/living/simple_animal/hostile/poison/terror_spider/green/ShowGuide()
@@ -81,7 +72,7 @@
 				spider_steps_taken++
 				CreatePath(cocoon_target)
 				step_to(src,cocoon_target)
-				if(spider_debug > 0)
+				if(spider_debug)
 					visible_message("<span class='notice'>\The [src] moves towards [cocoon_target] to cocoon it.</span>")
 	else if(fed)
 		DoLayGreenEggs()

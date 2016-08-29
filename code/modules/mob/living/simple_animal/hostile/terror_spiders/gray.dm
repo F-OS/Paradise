@@ -15,7 +15,6 @@
 	altnames = list("Gray Trap spider", "Gray Stalker spider", "Ghostly Ambushing spider")
 	spider_role_summary = "Stealth spider that ambushes weak humans from vents."
 	ai_target_method = TS_DAMAGE_BRUTE
-	egg_name = "gray spider eggs"
 
 	icon_state = "terror_gray"
 	icon_living = "terror_gray"

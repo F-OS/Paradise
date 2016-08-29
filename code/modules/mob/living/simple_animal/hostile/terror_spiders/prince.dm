@@ -15,14 +15,13 @@
 	desc = "An enormous, terrifying spider. It looks like it is judging everything it sees. Extremely dangerous."
 	spider_role_summary = "Boss-level terror spider. Lightning bruiser. Capable of taking on a squad by itself."
 	ai_target_method = TS_DAMAGE_BRUTE
-	egg_name = "prince spider eggs"
 
 	altnames = list("Prince of Terror", "Terror Prince")
 	icon_state = "terror_queen"
 	icon_living = "terror_queen"
 	icon_dead = "terror_queen_dead"
-	maxHealth = 600 // 30 laser shots. 15 cannon shots
-	health = 600
+	maxHealth = 400 // 20 laser shots. 10 cannon shots
+	health = 400
 	melee_damage_lower = 15
 	melee_damage_upper = 25
 	move_to_delay = 5

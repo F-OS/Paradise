@@ -15,7 +15,6 @@
 	altnames = list("Black Devil spider", "Giant Black Widow spider", "Shadow Terror spider")
 	spider_role_summary = "Hit-and-run attacker with extremely venomous bite."
 	ai_target_method = TS_DAMAGE_POISON
-	egg_name = "black spider eggs"
 
 	icon_state = "terror_black"
 	icon_living = "terror_black"
@@ -23,7 +22,7 @@
 	maxHealth = 120 // same health as hunter spider, aka, pretty weak.. but its bite will kill you!
 	health = 120
 	melee_damage_lower = 5
-	melee_damage_upper = 15
+	melee_damage_upper = 10
 	move_to_delay = 5
 	stat_attack = 1 // ensures they will target people in crit, too!
 	spider_tier = TS_TIER_2

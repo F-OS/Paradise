@@ -20,7 +20,6 @@ var/global/list/ts_spiderling_list = list()
 	var/altnames = list()
 	var/name_usealtnames = 0 // if 1, spiders use their randomized names, if not they're all "<color> terror"
 	desc = "The generic parent of all other terror spider types. If you see this in-game, it is a bug."
-	var/egg_name = "terror eggs"
 
 	// Icons
 	icon = 'icons/mob/terrorspider.dmi'
@@ -75,10 +74,10 @@ var/global/list/ts_spiderling_list = list()
 	var/regen_points = 0 // number of regen points they have by default
 	var/regen_points_max = 100 // max number of points they can accumulate
 	var/regen_points_per_tick = 1 // gain one regen point per tick
-	var/regen_points_per_kill = 100 // gain extra regen points if you kill something
-	var/regen_points_per_hp = 2 // every X regen points = 1 health point you can regen
-	// desired: 30hp/minute unmolested, 60hp/min on food boost, assuming one tick every 2 seconds
-	//          100/kill means bonus 50hp/kill regenerated over the next 1-2 minutes
+	var/regen_points_per_kill = 90 // gain extra regen points if you kill something
+	var/regen_points_per_hp = 3 // every X regen points = 1 health point you can regen
+	// desired: 20hp/minute unmolested, 40hp/min on food boost, assuming one tick every 2 seconds
+	//          90/kill means bonus 30hp/kill regenerated over the next 1-2 minutes
 
 	var/degenerate = 0 // if 1, they slowly degen until they all die off. Used by high-level abilities only.
 
@@ -130,7 +129,6 @@ var/global/list/ts_spiderling_list = list()
 	var/fed = 0
 	var/travelling_in_vent = 0
 	var/list/enemies = list()
-	var/list/nibbled = list()
 	var/path_to_vent = 0
 	var/killcount = 0
 	var/busy = 0 // leave this alone!
@@ -350,8 +348,6 @@ var/global/list/ts_spiderling_list = list()
 /mob/living/simple_animal/hostile/poison/terror_spider/death(gibbed)
 	if(!gibbed)
 		msg_terrorspiders("[src] has died in [get_area(src)].")
-		//if(!ckey && spider_tier < 3)
-		//	say(pick("Mistresssss will end you...", "Doom waitssss... for you...","She comessssss for your flesh..."))
 	if(!hasdroppedloot)
 		hasdroppedloot = 1
 		if(ts_count_dead == 0)
@@ -403,4 +399,24 @@ var/global/list/ts_spiderling_list = list()
 			log_runtime(EXCEPTION("Terror spider created with incorrect faction list at: [atom_loc_line(src)]"))
 			death()
 
+
+/mob/living/simple_animal/hostile/poison/terror_spider/proc/try_open_airlock(var/obj/machinery/door/airlock/D)
+	if(!D.density)
+		to_chat(src, "Closing doors does not help us.")
+	else if(D.welded)
+		to_chat(src, "The door is welded shut.")
+	else if(D.locked)
+		to_chat(src, "The door is bolted shut.")
+	else if(D.operating)
+	else if( (!istype(D.req_access) || !D.req_access.len) && (!istype(D.req_one_access) || !D.req_one_access.len) && (D.req_access_txt == "0") && (D.req_one_access_txt == "0") )
+		//visible_message("<span class='danger'>\the [src] opens the public-access door [D]!</span>")
+		D.open(1)
+	else if(D.arePowerSystemsOn() && (spider_opens_doors != 2))
+		to_chat(src, "The door's motors resist your efforts to force it.")
+	else if(!spider_opens_doors)
+		to_chat(src, "Your type of spider is not strong enough to force open doors.")
+	else
+		visible_message("<span class='danger'>\the [src] pries open the door!</span>")
+		playsound(src.loc, "sparks", 100, 1)
+		D.open(1)
 

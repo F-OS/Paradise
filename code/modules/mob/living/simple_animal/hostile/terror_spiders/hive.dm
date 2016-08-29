@@ -1,6 +1,14 @@
 
 // All terror spider code that relates to queen ruling over a hive
 
+
+/mob/living/simple_animal/hostile/poison/terror_spider/verb/ShowOrders()
+	set name = "Show Orders"
+	set category = "Spider"
+	set desc = "Find out what your orders are (from your queen or otherwise)."
+	DoShowOrders()
+
+
 /mob/living/simple_animal/hostile/poison/terror_spider/proc/DoHiveSense()
 	var/hsline = ""
 	to_chat(src, "Your Brood: ")
