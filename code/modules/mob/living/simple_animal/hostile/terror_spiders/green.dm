@@ -24,6 +24,13 @@
 	melee_damage_upper = 20
 	ventcrawler = 1
 
+	var/datum/action/innate/terrorspider/greeneggs/greeneggs_action
+
+
+/mob/living/simple_animal/hostile/poison/terror_spider/green/New()
+	greeneggs_action = new()
+	greeneggs_action.Grant(src)
+	..()
 
 /mob/living/simple_animal/hostile/poison/terror_spider/green/verb/LayGreenEggs()
 	set name = "Lay Green Eggs"
