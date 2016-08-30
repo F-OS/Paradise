@@ -14,7 +14,6 @@
 	desc = "An ominous-looking purple spider."
 	spider_role_summary = "Guards the nest of the Queen of Terror."
 	ai_target_method = TS_DAMAGE_BRUTE
-	altnames = list("Praetorian spider")
 
 	icon_state = "terror_purple"
 	icon_living = "terror_purple"
@@ -59,7 +58,7 @@
 	to_chat(src, guidelist.Join("<BR>"))
 
 
-/mob/living/simple_animal/hostile/poison/terror_spider/purple/spider_specialattack(var/mob/living/carbon/human/L, var/poisonable)
+/mob/living/simple_animal/hostile/poison/terror_spider/purple/spider_specialattack(mob/living/carbon/human/L, var/poisonable)
 	if(cycles_noqueen < 6 && prob(10))
 		visible_message("<span class='danger'>[src] rams into [L], knocking them to the floor!</span>")
 		L.Weaken(5)

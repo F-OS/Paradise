@@ -12,7 +12,6 @@
 /mob/living/simple_animal/hostile/poison/terror_spider/green
 	name = "Green Terror spider"
 	desc = "An ominous-looking green spider, it has a small egg-sac attached to it."
-	altnames = list("Green Terror spider","Insidious Breeding spider","Fast Bloodsucking spider")
 	spider_role_summary = "Average melee spider that webs its victims and lays more spider eggs"
 	ai_target_method = TS_DAMAGE_BRUTE
 
@@ -96,7 +95,7 @@
 					spider_steps_taken = 0
 					return
 
-/mob/living/simple_animal/hostile/poison/terror_spider/green/spider_specialattack(var/mob/living/carbon/human/L, var/poisonable)
+/mob/living/simple_animal/hostile/poison/terror_spider/green/spider_specialattack(mob/living/carbon/human/L, poisonable)
 	if(!poisonable)
 		..()
 		return

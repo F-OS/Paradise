@@ -16,7 +16,6 @@
 	desc = "The unholy offspring of spiders, nightmares, and lovecraft fiction."
 	spider_role_summary = "Adminbus spider"
 	ai_target_method = TS_DAMAGE_SIMPLE
-	altnames = list ("Terror Empress spider")
 
 	icon_state = "terror_queen"
 	icon_living = "terror_queen"
@@ -267,7 +266,7 @@
 	damage_type = TOX
 
 
-/obj/item/projectile/terrorempressspit/on_hit(var/mob/living/carbon/target)
+/obj/item/projectile/terrorempressspit/on_hit(mob/living/carbon/target)
 	if(istype(target, /mob))
 		var/mob/living/L = target
 		if(L.reagents)

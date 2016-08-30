@@ -15,7 +15,6 @@
 	spider_role_summary = "Rare, bite-and-run spider that infects hosts with spiderlings"
 	ai_target_method = TS_DAMAGE_POISON
 
-	altnames = list("White Terror spider","White Death spider","Ghostly Nightmare spider")
 	icon_state = "terror_white"
 	icon_living = "terror_white"
 	icon_dead = "terror_white_dead"
@@ -52,7 +51,7 @@
 	guidelist += "- Avoid groups, and stay alive, at all costs. White spiders, AKA White Death Spiders, are extremely rare, and impossible to replace!"
 	to_chat(src, guidelist.Join("<BR>"))
 
-/mob/living/simple_animal/hostile/poison/terror_spider/white/spider_specialattack(var/mob/living/carbon/human/L, var/poisonable)
+/mob/living/simple_animal/hostile/poison/terror_spider/white/spider_specialattack(mob/living/carbon/human/L, poisonable)
 	if(!poisonable)
 		..()
 		return

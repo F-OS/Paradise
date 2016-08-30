@@ -15,7 +15,7 @@
 	color = "#CF3600"
 	metabolization_rate = 0.1
 
-/datum/reagent/terror_black_toxin/on_mob_life(var/mob/living/M)
+/datum/reagent/terror_black_toxin/on_mob_life(mob/living/M)
 	if(volume < 15)
 		// bitten once, die slowly. Easy to survive a single bite - just go to medbay.
 		// total damage: 2/tick, human health 150 until crit, = 75 ticks, = 150 seconds = 2.5 minutes to get to medbay.
@@ -50,7 +50,7 @@
 	color = "#CF3600"
 	metabolization_rate = 0.1
 
-/datum/reagent/terror_white_tranq/on_mob_life(var/mob/living/M as mob)
+/datum/reagent/terror_white_tranq/on_mob_life(mob/living/M as mob)
 	if(!M)
 		M = holder.my_atom
 	// effects are similar to ketamine, aka the sleepy pen
@@ -72,7 +72,7 @@
 	color = "#CF3600"
 	metabolization_rate = 1
 
-/datum/reagent/terror_white_toxin/on_mob_life(var/mob/living/M as mob)
+/datum/reagent/terror_white_toxin/on_mob_life(mob/living/M as mob)
 	if(!M)
 		M = holder.my_atom
 	if(iscarbon(M))
@@ -89,7 +89,7 @@
 	color = "#CF3600"
 	metabolization_rate = 2
 
-/datum/reagent/terror_queen_toxin/on_mob_life(var/mob/living/M as mob)
+/datum/reagent/terror_queen_toxin/on_mob_life(mob/living/M as mob)
 	if(!M)
 		M = holder.my_atom
 	// make them hallucinate a lot, like a changeling sting

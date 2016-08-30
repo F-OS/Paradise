@@ -80,7 +80,7 @@
 	to_chat(src, "<B><span class='notice'> [commanded] spiders recieved your orders.</span></B>")
 
 
-/mob/living/simple_animal/hostile/poison/terror_spider/proc/SetHiveCommand(var/set_ai, var/set_ventcrawl, var/set_pc)
+/mob/living/simple_animal/hostile/poison/terror_spider/proc/SetHiveCommand(set_ai, set_ventcrawl, set_pc)
 	var/numspiders = 0
 	for(var/mob/living/simple_animal/hostile/poison/terror_spider/T in ts_spiderlist)
 		if(spider_awaymission && !T.spider_awaymission)
@@ -107,7 +107,7 @@
 	return numspiders
 
 
-/mob/living/simple_animal/hostile/poison/terror_spider/proc/DoShowOrders(var/usecache = 0, var/thequeen = null, var/theempress = null)
+/mob/living/simple_animal/hostile/poison/terror_spider/proc/DoShowOrders(usecache = 0, thequeen = null, theempress = null)
 	if(ckey)
 		to_chat(src, "------------------------")
 		if(ai_type == TS_AI_AGGRESSIVE)
@@ -141,7 +141,7 @@
 			numspiders += 1
 	return numspiders
 
-/mob/living/simple_animal/hostile/poison/terror_spider/proc/CountSpidersType(var/specific_type)
+/mob/living/simple_animal/hostile/poison/terror_spider/proc/CountSpidersType(specific_type)
 	var/numspiders = 0
 	for(var/mob/living/simple_animal/hostile/poison/terror_spider/T in ts_spiderlist)
 		if(T.stat != DEAD && !T.spider_placed && spider_awaymission == T.spider_awaymission)

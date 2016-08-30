@@ -13,7 +13,7 @@
 	icontype = "beaconsynd"
 	icon_state = "beaconsynd0"
 
-/obj/machinery/power/singularity_beacon/terrorspider_beacon/attack_hand(var/mob/user as mob)
+/obj/machinery/power/singularity_beacon/terrorspider_beacon/attack_hand(mob/user as mob)
 	if(anchored)
 		if(active)
 			to_chat(user, "<span class='warning'>[src] is already active, and there is no off button!</span>")

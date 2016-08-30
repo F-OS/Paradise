@@ -16,7 +16,6 @@
 	spider_role_summary = "Schmuck bait. Extremely weak in combat, but spawns many spiderlings when it dies."
 	ai_target_method = TS_DAMAGE_SIMPLE
 
-	altnames = list("Seemingly Harmless spider","Strange spider","Wolf Mother spider")
 	icon_state = "terror_queen"
 	icon_living = "terror_queen"
 	icon_dead = "terror_queen_dead"

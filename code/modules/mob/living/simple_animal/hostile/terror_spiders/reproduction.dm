@@ -142,7 +142,7 @@
 // ----------------- TERROR SPIDERS: EGGS (USED BY NURSE AND QUEEN TYPES) ---------
 // --------------------------------------------------------------------------------
 
-/mob/living/simple_animal/hostile/poison/terror_spider/proc/DoLayTerrorEggs(var/lay_type, var/lay_number, var/lay_crawl)
+/mob/living/simple_animal/hostile/poison/terror_spider/proc/DoLayTerrorEggs(lay_type, lay_number, lay_crawl)
 	stop_automated_movement = 1
 	var/obj/effect/spider/eggcluster/terror_eggcluster/C = new /obj/effect/spider/eggcluster/terror_eggcluster(get_turf(src))
 	C.spiderling_type = lay_type

@@ -196,17 +196,17 @@
 			CreatePath(target)
 	..()
 
-/mob/living/simple_animal/hostile/poison/terror_spider/proc/IsInfected(var/mob/living/carbon/C)
+/mob/living/simple_animal/hostile/poison/terror_spider/proc/IsInfected(mob/living/carbon/C)
 	if(C.get_int_organ(/obj/item/organ/internal/body_egg))
 		return 1
 	return 0
 
 
-/mob/living/simple_animal/hostile/poison/terror_spider/adjustBruteLoss(var/damage)
+/mob/living/simple_animal/hostile/poison/terror_spider/adjustBruteLoss(damage)
 	..(damage)
 	Retaliate()
 
-/mob/living/simple_animal/hostile/poison/terror_spider/adjustFireLoss(var/damage)
+/mob/living/simple_animal/hostile/poison/terror_spider/adjustFireLoss(damage)
 	..(damage)
 	Retaliate()
 
@@ -256,7 +256,7 @@
 // --------------------- TERROR SPIDERS: PATHING CODE -----------------------------
 // --------------------------------------------------------------------------------
 
-/mob/living/simple_animal/hostile/poison/terror_spider/proc/CreatePath(var/mygoal)
+/mob/living/simple_animal/hostile/poison/terror_spider/proc/CreatePath(mygoal)
 	var/m2 = get_turf(src)
 	if(m2 == mylocation)
 		chasecycles++
@@ -277,7 +277,7 @@
 		mylocation = m2
 		chasecycles = 0
 
-/mob/living/simple_animal/hostile/poison/terror_spider/proc/ClearObstacle(var/turf/target_turf)
+/mob/living/simple_animal/hostile/poison/terror_spider/proc/ClearObstacle(turf/target_turf)
 	//DestroySurroundings()
 	// ***** This does not allow spiders to smash windoors (e.g: UO71 bar windoor) for some reason.
 	var/list/valid_obstacles = list(/obj/structure/window, /obj/structure/closet, /obj/structure/table, /obj/structure/grille, /obj/structure/rack, /obj/machinery/door/window)
@@ -360,7 +360,7 @@
 // --------------------------------------------------------------------------------
 
 
-/mob/living/simple_animal/hostile/poison/terror_spider/proc/UnlockBlastDoors(var/target_id_tag, var/msg_to_send)
+/mob/living/simple_animal/hostile/poison/terror_spider/proc/UnlockBlastDoors(target_id_tag, msg_to_send)
 	var/unlocked_something = 0
 	for(var/obj/machinery/door/poddoor/P in airlocks)
 		if(P.density && P.id_tag == target_id_tag && P.z == z)

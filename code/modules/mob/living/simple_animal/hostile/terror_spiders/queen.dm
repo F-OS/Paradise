@@ -15,7 +15,6 @@
 	spider_role_summary = "Commander of the spider forces. Lays eggs, directs the brood."
 	ai_target_method = TS_DAMAGE_SIMPLE
 
-	altnames = list("Queen of Terror","Brood Mother")
 	icon_state = "terror_queen"
 	icon_living = "terror_queen"
 	icon_dead = "terror_queen_dead"
@@ -387,7 +386,7 @@
 		to_chat(src, "You have run out of uses of this ability.")
 
 
-/mob/living/simple_animal/hostile/poison/terror_spider/queen/proc/DoQueenScreech(var/light_range, var/light_chance, var/camera_range, var/camera_chance)
+/mob/living/simple_animal/hostile/poison/terror_spider/queen/proc/DoQueenScreech(light_range, light_chance, camera_range, camera_chance)
 	visible_message("<span class='userdanger'>\The [src] emits a bone-chilling shriek!</span>")
 	for(var/obj/machinery/light/L in orange(light_range,src))
 		if(L.on && prob(light_chance))
@@ -441,7 +440,7 @@
 	damage_type = TOX
 
 
-/obj/item/projectile/terrorqueenspit/on_hit(var/mob/living/carbon/target)
+/obj/item/projectile/terrorqueenspit/on_hit(mob/living/carbon/target)
 	if(istype(target, /mob))
 		var/mob/living/L = target
 		if(L.reagents)
