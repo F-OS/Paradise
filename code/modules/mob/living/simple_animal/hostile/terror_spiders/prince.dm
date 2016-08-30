@@ -16,7 +16,6 @@
 	spider_role_summary = "Boss-level terror spider. Lightning bruiser. Capable of taking on a squad by itself."
 	ai_target_method = TS_DAMAGE_BRUTE
 
-	altnames = list("Prince of Terror", "Terror Prince")
 	icon_state = "terror_queen"
 	icon_living = "terror_queen"
 	icon_dead = "terror_queen_dead"
@@ -51,7 +50,7 @@
 	guidelist += "- Expect crew to treat you as a level 5 biohazard. Even a single Prince (aka: War Spider) can wreck a station."
 	to_chat(src, guidelist.Join("<BR>"))
 
-/mob/living/simple_animal/hostile/poison/terror_spider/prince/spider_specialattack(var/mob/living/carbon/human/L)
+/mob/living/simple_animal/hostile/poison/terror_spider/prince/spider_specialattack(mob/living/carbon/human/L)
 	if(prob(15))
 		visible_message("<span class='danger'>[src] rams into [L], knocking them to the floor!</span>")
 		L.Weaken(5)

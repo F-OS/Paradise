@@ -12,10 +12,8 @@
 /mob/living/simple_animal/hostile/poison/terror_spider/gray
 	name = "Gray Terror spider"
 	desc = "An ominous-looking gray spider, its color and shape makes it hard to see."
-	altnames = list("Gray Trap spider", "Gray Stalker spider", "Ghostly Ambushing spider")
 	spider_role_summary = "Stealth spider that ambushes weak humans from vents."
 	ai_target_method = TS_DAMAGE_BRUTE
-
 	icon_state = "terror_gray"
 	icon_living = "terror_gray"
 	icon_dead = "terror_gray_dead"
@@ -32,12 +30,12 @@
 	vision_type = null // prevent them seeing through walls when doing AOE web.
 
 
-/mob/living/simple_animal/hostile/poison/terror_spider/gray/adjustBruteLoss(var/damage)
+/mob/living/simple_animal/hostile/poison/terror_spider/gray/adjustBruteLoss(damage)
 	..(damage)
 	if(invisibility > 0 || icon_state == "terror_gray_cloaked")
 		GrayDeCloak()
 
-/mob/living/simple_animal/hostile/poison/terror_spider/gray/adjustFireLoss(var/damage)
+/mob/living/simple_animal/hostile/poison/terror_spider/gray/adjustFireLoss(damage)
 	..(damage)
 	if(invisibility > 0 || icon_state == "terror_gray_cloaked")
 		GrayDeCloak()
@@ -138,7 +136,7 @@
 					step_to(src,temp_vent)
 					// if you're bumped off your vent, try to get back to it
 
-/mob/living/simple_animal/hostile/poison/terror_spider/gray/spider_specialattack(var/mob/living/carbon/human/L, var/poisonable)
+/mob/living/simple_animal/hostile/poison/terror_spider/gray/spider_specialattack(mob/living/carbon/human/L, var/poisonable)
 	if(!poisonable)
 		..()
 		return
