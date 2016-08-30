@@ -1,9 +1,3 @@
-#define SOLID 1
-#define LIQUID 2
-#define GAS 3
-#define FOOD_METABOLISM 0.4
-#define REM REAGENTS_EFFECT_MULTIPLIER
-
 
 // Terror Spider, Black, Deadly Venom
 
@@ -11,7 +5,6 @@
 	name = "Black Widow venom"
 	id = "terror_black_toxin"
 	description = "An incredibly toxic venom injected by the Black Widow spider."
-	reagent_state = LIQUID
 	color = "#CF3600"
 	metabolization_rate = 0.1
 
@@ -46,7 +39,6 @@
 	name = "White Spider tranquilizer"
 	id = "terror_white_tranq"
 	description = "A venom that incapacitites those who attack the White Death spider."
-	reagent_state = LIQUID
 	color = "#CF3600"
 	metabolization_rate = 0.1
 
@@ -68,7 +60,6 @@
 	name = "White Spider venom"
 	id = "terror_white_toxin"
 	description = "A venom consisting of thousands of tiny spider eggs. When injected under the skin, they feed on living flesh and grow into new spiders."
-	reagent_state = LIQUID
 	color = "#CF3600"
 	metabolization_rate = 1
 
@@ -85,7 +76,6 @@
 	name = "Terror Queen venom"
 	id = "terror_queen_toxin"
 	description = "A royally potent venom."
-	reagent_state = LIQUID
 	color = "#CF3600"
 	metabolization_rate = 2
 
