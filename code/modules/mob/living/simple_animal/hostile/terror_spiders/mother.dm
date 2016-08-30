@@ -46,12 +46,3 @@
 		degenerate = 1
 	..()
 
-
-/mob/living/simple_animal/hostile/poison/terror_spider/mother/ShowGuide()
-	..()
-	var/list/guidelist = list()
-	guidelist += "MOTHER OF TERROR guide:"
-	guidelist += "- A form of living schmuck bait, you are fairly harmless while alive."
-	guidelist += "- <b>When you die, dozens of spiderlings will come swarming off your back, infesting the whole station.</b>"
-	guidelist += "- When you die, try to die near a vent. The spiderlings will need vent access to get away."
-	to_chat(src, guidelist.Join("<BR>"))

@@ -48,13 +48,6 @@
 			DoLayTerrorEggs(/mob/living/simple_animal/hostile/poison/terror_spider/green, 1, 1)
 		fed--
 
-/mob/living/simple_animal/hostile/poison/terror_spider/green/ShowGuide()
-	..()
-	var/list/guidelist = list()
-	guidelist += "GREEN TERROR guide:"
-	guidelist += "- You are a breeding spider. Your job is to use the 'Wrap' verb (Spider tab) on any dead humaniod, then 'Lay Green Eggs'. These eggs hatch into more spiders!"
-	guidelist += "- Lay your eggs in dark, low-traffic areas near vents. Don't be afraid to retreat from a fight to lay another day."
-	to_chat(src, guidelist.Join("<BR>"))
 
 /mob/living/simple_animal/hostile/poison/terror_spider/green/spider_special_action()
 	if(cocoon_target)

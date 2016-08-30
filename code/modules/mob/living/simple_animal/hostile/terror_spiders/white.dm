@@ -40,17 +40,6 @@
 	..()
 
 
-/mob/living/simple_animal/hostile/poison/terror_spider/white/ShowGuide()
-	..()
-	var/list/guidelist = list()
-	guidelist += "WHITE TERROR guide:"
-	guidelist += "- Amongst the most feared of all terror spiders, your multi-stage bite attack injects tiny spider eggs into a host, which will make spiders grow out of their skin in time."
-	guidelist += "- You should advance quickly, attack three times, then retreat, letting your venom of tiny eggs do its work."
-	guidelist += "- <span class='notice'>Your main objective is to infect humanoids with your egg venom, so that you can start a hive.</span>"
-	guidelist += "- <span class='notice'>Once the hive has started, they will look to you for leadership.</span>"
-	guidelist += "- Avoid groups, and stay alive, at all costs. White spiders, AKA White Death Spiders, are extremely rare, and impossible to replace!"
-	to_chat(src, guidelist.Join("<BR>"))
-
 /mob/living/simple_animal/hostile/poison/terror_spider/white/spider_specialattack(mob/living/carbon/human/L, poisonable)
 	if(!poisonable)
 		..()
