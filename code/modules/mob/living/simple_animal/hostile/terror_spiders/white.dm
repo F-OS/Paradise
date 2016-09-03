@@ -62,7 +62,7 @@
 		if(degenerate)
 			visible_message("<span class='danger'>[src] does not have the strength to bite [target]!</span>")
 		else if(L.stunned || L.paralysis || L.can_inject(null,0,inject_target,0))
-			if(!L.get_int_organ(/obj/item/organ/internal/body_egg))
+			if(!IsInfected(L))
 				new /obj/item/organ/internal/body_egg/terror_eggs(L)
 			visible_message("<span class='danger'>[src] injects a green venom into the [inject_target] of [target]!</span>")
 		else
