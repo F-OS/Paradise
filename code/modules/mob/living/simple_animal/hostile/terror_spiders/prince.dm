@@ -19,7 +19,7 @@
 	icon_state = "terror_queen"
 	icon_living = "terror_queen"
 	icon_dead = "terror_queen_dead"
-	maxHealth = 400 // 20 laser shots. 10 cannon shots
+	maxHealth = 400 // 20 laser shots.
 	health = 400
 	melee_damage_lower = 15
 	melee_damage_upper = 25

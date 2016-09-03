@@ -54,21 +54,6 @@
 		M.Paralyse(10)
 	..()
 
-// Terror Spider, White, Egg Venom
-
-/datum/reagent/terror_white_toxin
-	name = "White Spider venom"
-	id = "terror_white_toxin"
-	description = "A venom consisting of thousands of tiny spider eggs. When injected under the skin, they feed on living flesh and grow into new spiders."
-	color = "#CF3600"
-	metabolization_rate = 1
-
-/datum/reagent/terror_white_toxin/on_mob_life(mob/living/M as mob)
-	if(!M)
-		M = holder.my_atom
-	if(iscarbon(M))
-		if(!M.get_int_organ(/obj/item/organ/internal/body_egg))
-			new /obj/item/organ/internal/body_egg/terror_eggs(M)
 
 // Terror Spider, Queen Toxin
 

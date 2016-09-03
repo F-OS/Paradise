@@ -83,12 +83,6 @@
 // ---------- WRAP
 
 
-/mob/living/simple_animal/hostile/poison/terror_spider/verb/Wrap()
-	set name = "Wrap"
-	set category = "Spider"
-	set desc = "Wrap up corpses (and possibly other ajacent objects)"
-	DoWrap()
-
 /mob/living/simple_animal/hostile/poison/terror_spider/proc/DoWrap()
 	if(!cocoon_target)
 		var/list/choices = list()
