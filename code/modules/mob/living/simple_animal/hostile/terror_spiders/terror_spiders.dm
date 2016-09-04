@@ -292,7 +292,6 @@ var/global/list/ts_spiderling_list = list()
 		add_language("Galactic Common")
 		default_language = all_languages["TerrorSpider"]
 
-		name += " ([rand(1, 1000)])"
 		msg_terrorspiders("[src] has grown in [get_area(src)].")
 		if(is_away_level(z))
 			spider_awaymission = 1

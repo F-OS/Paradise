@@ -11,7 +11,7 @@
 
 /mob/living/simple_animal/hostile/poison/terror_spider/gray
 	name = "Gray Terror spider"
-	desc = "An ominous-looking gray spider, its color and shape makes it hard to see."
+	desc = "An ominous-looking gray spider. It seems silent, but twitches occasionally."
 	spider_role_summary = "Stealth spider that ambushes weak humans from vents."
 	ai_target_method = TS_DAMAGE_BRUTE
 	icon_state = "terror_gray"

@@ -89,12 +89,18 @@
 			var/obj/effect/spider/spiderling/terror_spiderling/S1 = new(get_turf(owner))
 			S1.grow_as = /mob/living/simple_animal/hostile/poison/terror_spider/red
 			S1.name = "red spiderling"
+			if(prob(50))
+				S1.stillborn = 1
 			var/obj/effect/spider/spiderling/terror_spiderling/S2 = new(get_turf(owner))
 			S2.grow_as = /mob/living/simple_animal/hostile/poison/terror_spider/gray
 			S2.name = "gray spiderling"
+			if(prob(50))
+				S2.stillborn = 1
 			var/obj/effect/spider/spiderling/terror_spiderling/S3 = new(get_turf(owner))
 			S3.grow_as = /mob/living/simple_animal/hostile/poison/terror_spider/green
 			S3.name = "green spiderling"
+			if(prob(50))
+				S3.stillborn = 1
 			if(alternate_ending)
 				// This is the alternate ending of the infestation, triggered above by someone bringing back an infection from a gateway mission to the main station.
 				// In this ending, we still spawn spiderlings - but we make sure they're stillborn, and don't grow up.

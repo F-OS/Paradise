@@ -11,7 +11,7 @@
 
 /mob/living/simple_animal/hostile/poison/terror_spider/purple
 	name = "Purple Terror spider"
-	desc = "An ominous-looking purple spider."
+	desc = "An ominous-looking purple spider. It looks about warily, as if waiting for something."
 	spider_role_summary = "Guards the nest of the Queen of Terror."
 	ai_target_method = TS_DAMAGE_BRUTE
 

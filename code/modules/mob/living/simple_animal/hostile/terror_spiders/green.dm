@@ -11,7 +11,7 @@
 
 /mob/living/simple_animal/hostile/poison/terror_spider/green
 	name = "Green Terror spider"
-	desc = "An ominous-looking green spider, it has a small egg-sac attached to it."
+	desc = "An ominous-looking green spider. It has a small egg-sac attached to it."
 	spider_role_summary = "Average melee spider that webs its victims and lays more spider eggs"
 	ai_target_method = TS_DAMAGE_BRUTE
 
@@ -23,6 +23,7 @@
 	melee_damage_lower = 10
 	melee_damage_upper = 20
 	ventcrawler = 1
+	var/feedings_to_lay = 3
 
 	var/datum/action/innate/terrorspider/greeneggs/greeneggs_action
 
@@ -43,8 +44,8 @@
 	var/obj/effect/spider/eggcluster/E = locate() in get_turf(src)
 	if(E)
 		to_chat(src, "<span class='notice'>There is already a cluster of eggs here!</span>")
-	else if(!fed)
-		to_chat(src, "<span class='warning'>You are too hungry to do this!</span>")
+	else if(fed < feedings_to_lay)
+		to_chat(src, "<span class='warning'>You must wrap more prey before you can do this!</span>")
 	else
 		visible_message("<span class='notice'>\The [src] begins to lay a cluster of eggs.</span>")
 		if(prob(33))
@@ -53,7 +54,7 @@
 			DoLayTerrorEggs(/mob/living/simple_animal/hostile/poison/terror_spider/gray, 1, 1)
 		else
 			DoLayTerrorEggs(/mob/living/simple_animal/hostile/poison/terror_spider/green, 1, 1)
-		fed--
+		fed -= feedings_to_lay
 
 
 /mob/living/simple_animal/hostile/poison/terror_spider/green/spider_special_action()

@@ -12,13 +12,13 @@
 
 /mob/living/simple_animal/hostile/poison/terror_spider/mother
 	name = "Mother of Terror spider"
-	desc = "An enormous spider. Its back is a crawling mass of spiderlings. All of them look around with beady little eyes. The horror!"
+	desc = "An enormous spider. Hundreds of tiny spiderlings are crawling all over it. Their beady little eyes stare at you. The horror!"
 	spider_role_summary = "Schmuck bait. Extremely weak in combat, but spawns many spiderlings when it dies."
 	ai_target_method = TS_DAMAGE_SIMPLE
 
-	icon_state = "terror_queen"
-	icon_living = "terror_queen"
-	icon_dead = "terror_queen_dead"
+	icon_state = "terror_gray2"
+	icon_living = "terror_gray2"
+	icon_dead = "terror_gray2_dead"
 	maxHealth = 50
 	health = 50
 	melee_damage_lower = 10
@@ -38,7 +38,7 @@
 		for(var/i=0, i<30, i++)
 			var/obj/effect/spider/spiderling/terror_spiderling/S = new /obj/effect/spider/spiderling/terror_spiderling(get_turf(src))
 			S.grow_as = pick(/mob/living/simple_animal/hostile/poison/terror_spider/red, /mob/living/simple_animal/hostile/poison/terror_spider/gray)
-			if(prob(50))
+			if(prob(66))
 				S.stillborn = 1
 			else if(prob(10))
 				S.grow_as = pick(/mob/living/simple_animal/hostile/poison/terror_spider/black, /mob/living/simple_animal/hostile/poison/terror_spider/green)
