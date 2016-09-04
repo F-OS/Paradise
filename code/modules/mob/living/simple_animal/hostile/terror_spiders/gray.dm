@@ -128,7 +128,7 @@
 					step_to(src,temp_vent)
 					// if you're bumped off your vent, try to get back to it
 
-/mob/living/simple_animal/hostile/poison/terror_spider/gray/spider_specialattack(mob/living/carbon/human/L, var/poisonable)
+/mob/living/simple_animal/hostile/poison/terror_spider/gray/spider_specialattack(mob/living/carbon/human/L, poisonable)
 	if(!poisonable)
 		..()
 		return
