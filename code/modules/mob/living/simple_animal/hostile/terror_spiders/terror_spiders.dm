@@ -95,8 +95,6 @@ var/global/list/ts_spiderling_list = list()
 	var/freq_break_light = 600 // one minute
 	var/last_break_light = 0 // leave this, changed by procs.
 
-	var/player_breaks_cameras = 1  // Toggle for players breaking cameras
-
 	var/ai_spins_webs = 1 // AI web-spinning behavior
 	var/freq_spins_webs = 600 // one minute
 	var/last_spins_webs = 0 // leave this, changed by procs.
@@ -176,18 +174,6 @@ var/global/list/ts_spiderling_list = list()
 		CheckFaction()
 	else if(istype(target, /obj/effect/spider/cocoon))
 		to_chat(src, "Destroying our own cocoons would not help us.")
-	else if(istype(target, /obj/machinery/camera))
-		if(player_breaks_cameras)
-			var/obj/machinery/camera/C = target
-			if(C.status)
-				do_attack_animation(C)
-				C.toggle_cam(src, 0)
-				visible_message("<span class='danger'>\The [src] smashes the [C.name].</span>")
-				playsound(loc, 'sound/weapons/slash.ogg', 100, 1)
-			else
-				to_chat(src, "The camera is already deactivated.")
-		else
-			to_chat(src, "Your type of spider cannot break cameras.")
 	else if(istype(target, /obj/machinery/door/firedoor))
 		var/obj/machinery/door/firedoor/F = target
 		if(F.density)
@@ -287,40 +273,30 @@ var/global/list/ts_spiderling_list = list()
 	if(is_away_level(z))
 		spider_awaymission = 1
 		ts_count_alive_awaymission++
+		if(spider_tier >= 3)
+			ai_ventcrawls = 0 // means that pre-spawned bosses on away maps won't ventcrawl. Necessary to keep prince/mother in one place.
+		if(istype(get_area(src), /area/awaymission/UO71)) // if we are playing the away mission with our special spiders...
+			spider_uo71 = 1
+			if(world.time < 600)
+				// these are static spiders, specifically for the UO71 away mission, make them stay in place
+				ai_ventcrawls = 0
+				spider_placed = 1
+				wander = 0
 	else
-		add_language("TerrorSpider")
-		add_language("Galactic Common")
-		default_language = all_languages["TerrorSpider"]
-
-		msg_terrorspiders("[src] has grown in [get_area(src)].")
-		if(is_away_level(z))
-			spider_awaymission = 1
-			if(spider_tier >= 3)
-				ai_ventcrawls = 0 // means that pre-spawned bosses on away maps won't ventcrawl. Necessary to keep prince/mother in one place.
-			if(istype(get_area(src), /area/awaymission/UO71)) // if we are playing the away mission with our special spiders...
-				spider_uo71 = 1
-				if(world.time < 600)
-					// these are static spiders, specifically for the UO71 away mission, make them stay in place
-					ai_ventcrawls = 0
-					spider_placed = 1
-					wander = 0
-			ts_count_alive_awaymission++
-		else
-			ts_count_alive_station++
-		// after 30 seconds, assuming nobody took control of it yet, offer it to ghosts.
-		spawn(150) // deciseconds!
-			CheckFaction()
-		spawn(300) // deciseconds!
-			if(spider_awaymission)
-				return
-			if(stat == DEAD)
-				return
-			if(ckey)
-				var/image/alert_overlay = image('icons/mob/terrorspider.dmi', icon_state)
-				notify_ghosts("[src] has appeared in [get_area(src)]. (already player-controlled)", source = src, alert_overlay = alert_overlay)
-			else if(ai_playercontrol_allowingeneral && ai_playercontrol_allowtype)
-				var/image/alert_overlay = image('icons/mob/terrorspider.dmi', icon_state)
-				notify_ghosts("[src] has appeared in [get_area(src)].", enter_link = "<a href=?src=\ref[src];activate=1>(Click to control)</a>", source = src, alert_overlay = alert_overlay, attack_not_jump = 1)
+		ts_count_alive_station++
+	spawn(150) // deciseconds!
+		CheckFaction()
+	spawn(300) // deciseconds!
+		if(spider_awaymission)
+			return
+		if(stat == DEAD)
+			return
+		if(ckey)
+			var/image/alert_overlay = image('icons/mob/terrorspider.dmi', icon_state)
+			notify_ghosts("[src] has appeared in [get_area(src)]. (already player-controlled)", source = src, alert_overlay = alert_overlay)
+		else if(ai_playercontrol_allowingeneral && ai_playercontrol_allowtype)
+			var/image/alert_overlay = image('icons/mob/terrorspider.dmi', icon_state)
+			notify_ghosts("[src] has appeared in [get_area(src)].", enter_link = "<a href=?src=\ref[src];activate=1>(Click to control)</a>", source = src, alert_overlay = alert_overlay, attack_not_jump = 1)
 
 /mob/living/simple_animal/hostile/poison/terror_spider/Destroy()
 	ts_spiderlist -= src
@@ -355,8 +331,6 @@ var/global/list/ts_spiderling_list = list()
 		msg_terrorspiders("[src] has died in [get_area(src)].")
 	if(!hasdroppedloot)
 		hasdroppedloot = 1
-		if(ts_count_dead == 0)
-			visible_message("<span class='userdanger'>The Terrors have awoken!</span>")
 		ts_count_dead++
 		ts_death_last = world.time
 		if(spider_awaymission)

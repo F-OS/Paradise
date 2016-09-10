@@ -196,11 +196,6 @@
 			CreatePath(target)
 	..()
 
-/mob/living/simple_animal/hostile/poison/terror_spider/proc/IsInfected(mob/living/carbon/C)
-	if(C.get_int_organ(/obj/item/organ/internal/body_egg))
-		return 1
-	return 0
-
 
 /mob/living/simple_animal/hostile/poison/terror_spider/adjustBruteLoss(damage)
 	..(damage)

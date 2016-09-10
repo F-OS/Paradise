@@ -33,14 +33,7 @@
 	greeneggs_action.Grant(src)
 	..()
 
-/mob/living/simple_animal/hostile/poison/terror_spider/green/verb/LayGreenEggs()
-	set name = "Lay Green Eggs"
-	set category = "Spider"
-	set desc = "Lay a clutch of eggs. You must have wrapped a prey creature for feeding first."
-	DoLayGreenEggs()
-
-
-/mob/living/simple_animal/hostile/poison/terror_spider/proc/DoLayGreenEggs()
+/mob/living/simple_animal/hostile/poison/terror_spider/green/proc/DoLayGreenEggs()
 	var/obj/effect/spider/eggcluster/E = locate() in get_turf(src)
 	if(E)
 		to_chat(src, "<span class='notice'>There is already a cluster of eggs here!</span>")

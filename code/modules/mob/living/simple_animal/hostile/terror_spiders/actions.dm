@@ -22,8 +22,8 @@
 	icon_icon = 'icons/effects/effects.dmi'
 	button_icon_state = "eggs"
 
-/datum/action/innate/terrorspider/wrap/Activate()
-	var/mob/living/simple_animal/hostile/poison/terror_spider/user = owner
+/datum/action/innate/terrorspider/greeneggs/Activate()
+	var/mob/living/simple_animal/hostile/poison/terror_spider/green/user = owner
 	user.DoLayGreenEggs()
 
 

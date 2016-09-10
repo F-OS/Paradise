@@ -45,81 +45,15 @@
 		..()
 		return
 	var/inject_target = pick("chest","head")
-	if(attackstep == 0)
-		visible_message("<span class='danger'>[src] crouches down on its powerful hind legs! </span>")
-		attackstep = 1
-	else if(attackstep == 1)
-		visible_message("<span class='danger'>[src] pounces on [target]! </span>")
-		do_attack_animation(L)
-		L.emote("scream")
-		L.drop_l_hand()
-		L.drop_r_hand()
-		L.Weaken(5) // stunbaton-like stun, floors them
-		L.Stun(5)
-		attackstep = 2
-	else if(attackstep == 2)
-		do_attack_animation(L)
-		if(degenerate)
-			visible_message("<span class='danger'>[src] does not have the strength to bite [target]!</span>")
-		else if(L.stunned || L.paralysis || L.can_inject(null,0,inject_target,0))
-			if(!IsInfected(L))
-				new /obj/item/organ/internal/body_egg/terror_eggs(L)
-			visible_message("<span class='danger'>[src] injects a green venom into the [inject_target] of [target]!</span>")
-		else
-			visible_message("<span class='danger'>[src] bites [target], but cannot inject venom into their [inject_target]!</span>")
-		attackstep = 3
-	else if(attackstep == 3)
-		if(L in enemies)
-			if(L.stunned || L.paralysis || L.can_inject(null,0,inject_target,0))
-				do_attack_animation(L)
-				L.reagents.add_reagent("terror_white_tranq", 5)
-				visible_message("<span class='danger'> [src] injects a blue venom into the [inject_target] of [target]!</span></span>")
-				enemies -= L
-			else
-				do_attack_animation(L)
-				visible_message("<span class='danger'>[src] bites [target], but cannot inject venom into their [inject_target]!</span>")
-		else
-			visible_message("<span class='notice'>[src] takes a moment to recover... </span>")
-		attackstep = 4
-	else if(attackstep == 4)
-		attackstep = 0
-		attackcycles++
-		if(ckey)
-			if(IsInfected(L))
-				to_chat(src, "<span class='notice'>[L] is infected. Find another host to attack/infect, or leave the area.</span>")
-			else
-				L.attack_animal(src)
-		else
-			if(attackcycles >= 3) // if we've an AI who has gone through 3 infection attempts on a single target, just give up trying to infect it, and kill it instead.
-				attackstep = 5
-				L.attack_animal(src)
-				return
-			if(!IsInfected(L))
-				visible_message("<span class='notice'>[src] takes a moment to recover. </span>")
-				return
+	if(L.stunned || L.paralysis || L.can_inject(null,0,inject_target,0))
+		if(!IsInfected(L))
+			new /obj/item/organ/internal/body_egg/terror_eggs(L)
 			if(!ckey)
-				var/vdistance = 99
-				for(var/obj/machinery/atmospherics/unary/vent_pump/v in view(10,src))
-					if(!v.welded)
-						if(get_dist(src,v) < vdistance)
-							entry_vent = v
-							vdistance = get_dist(src,v)
-				var/list/numtargets = ListTargets()
-				if(numtargets.len > 0)
-					LoseTarget()
-					walk_away(src,L,2,1)
-				else if(entry_vent)
-					visible_message("<span class='notice'>[src] lets go of [target], and tries to flee! </span>")
-					path_to_vent = 1
-					var/temp_ai_type = ai_type
-					ai_type = TS_AI_DEFENSIVE
-					LoseTarget()
-					walk_away(src,L,2,1)
-					spawn(100) // 10 seconds
-						ai_type = temp_ai_type
-				else
-					LoseTarget()
-	else if(attackstep == 5)
-		L.attack_animal(src)
-	else
-		attackstep = 0
+				LoseTarget()
+				walk_away(src,L,2,1)
+
+
+/mob/living/simple_animal/hostile/poison/terror_spider/proc/IsInfected(mob/living/carbon/C)
+	if(C.get_int_organ(/obj/item/organ/internal/body_egg))
+		return 1
+	return 0

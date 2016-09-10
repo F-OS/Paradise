@@ -114,11 +114,9 @@
 				owner.adjustToxLoss(rand(100,180)) // normal case, range: 100-180, average 140, almost crit (150).
 		if(190) // 6m 30s
 			to_chat(owner,"<span class='danger'>The spiderlings are gone. Your wound, though, looks worse than ever. Remnants of tiny spider eggs, and dead spiders, inside your flesh. Disgusting.</span>")
-			owner.reagents.remove_reagent("terror_white_toxin")
 			qdel(src)
 
 /obj/item/organ/internal/body_egg/terror_eggs/remove(var/mob/living/carbon/M, var/special = 0)
 	..()
-	M.reagents.del_reagent("terror_white_toxin") // prevent reinfection
 	qdel(src) // prevent people re-implanting them into others
 	return null
