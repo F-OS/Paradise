@@ -29,3 +29,5 @@
 #define TS_TIER_3 3
 #define TS_TIER_4 4
 #define TS_TIER_5 5
+
+#define isterrorspider(A) (istype((A), /mob/living/simple_animal/hostile/poison/terror_spider))

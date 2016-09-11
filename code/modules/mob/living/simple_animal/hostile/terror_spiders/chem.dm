@@ -33,26 +33,6 @@
 		M.Paralyse(5)
 	..()
 
-// Terror Spider, White, Tranq
-
-/datum/reagent/terror_white_tranq
-	name = "White Spider tranquilizer"
-	id = "terror_white_tranq"
-	description = "A venom that incapacitites those who attack the White Death spider."
-	color = "#CF3600"
-	metabolization_rate = 0.1
-
-/datum/reagent/terror_white_tranq/on_mob_life(mob/living/M as mob)
-	if(!M)
-		M = holder.my_atom
-	// effects are similar to ketamine, aka the sleepy pen
-	if(current_cycle >= 3)
-		M.confused = max(M.confused, 5)
-	if(current_cycle >= 6)
-		M.eye_blurry = max(M.eye_blurry, 5)
-	if(current_cycle >= 10)
-		M.Paralyse(10)
-	..()
 
 
 // Terror Spider, Queen Toxin

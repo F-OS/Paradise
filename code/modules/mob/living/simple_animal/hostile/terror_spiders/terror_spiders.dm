@@ -209,7 +209,7 @@ var/global/list/ts_spiderling_list = list()
 	else
 		target.attack_animal(src)
 
-/mob/living/simple_animal/hostile/poison/terror_spider/proc/spider_specialattack(mob/living/carbon/human/L, var/poisonable)
+/mob/living/simple_animal/hostile/poison/terror_spider/proc/spider_specialattack(mob/living/carbon/human/L, poisonable)
 	L.attack_animal(src)
 
 

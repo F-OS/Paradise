@@ -1,119 +1,87 @@
-
 // --------------------------------------------------------------------------------
 // --------------------- TERROR SPIDERS: TARGETING CODE -----------------------
 // --------------------------------------------------------------------------------
 
 /mob/living/simple_animal/hostile/poison/terror_spider/ListTargets()
+	if(ai_type == TS_AI_PASSIVE)
+		return list()
 	var/list/targets1 = list()
 	var/list/targets2 = list()
 	var/list/targets3 = list()
-	if(ai_type == TS_AI_AGGRESSIVE)
-		// default, BE AGGRESSIVE
-		//var/list/Mobs = hearers(vision_range, src) - src // this is how ListTargets for /mob/living/simple_animal/hostile/ does it, but it is wrong, it ignores NPCs.
-		for(var/mob/living/H in view(src, vision_range))
-		//for(var/mob/H in Mobs)
-			if(H.stat == 2)
-				continue
-			else if(H.flags & GODMODE)
-				continue
-			else if(!stat_attack && H.stat == UNCONSCIOUS)
-				continue
-			else if(istype(H, /mob/living/simple_animal/hostile/poison/terror_spider))
-				if(H in enemies)
-					targets3 += H
-				continue
-			else if(H.reagents)
-				if(H.paralysis && H.reagents.has_reagent("terror_white_tranq"))
-					// let's not target completely paralysed mobs.
-					if(H in enemies)
-						targets3 += H
-						// unless we hate their guts
-				if(istype(H, /mob/living/carbon))
-					var/mob/living/carbon/C = H
-					if(IsInfected(C)) // target them if they attack us
-						if(C in enemies)
-							targets3 += C
-							continue
-				if(H.reagents.has_reagent("terror_black_toxin",30))
-					if(get_dist(src,H) <= 2)
-						// if they come to us...
-						targets2 += H
-					else if((H in enemies) && !H.reagents.has_reagent("terror_black_toxin",31))
-						// if we're aggressive, and they're not going to die quickly...
-						targets2 += H
-				else
-					if(ai_target_method == TS_DAMAGE_BRUTE)
-						var/theirarmor = H.getarmor(type = "melee")
-						// Example values: Civilian: 2, Engineer w/ Hardsuit: 10, Sec Officer with armor: 19, HoS: 48, Deathsquad: 80
-						if(theirarmor < 10)
-							targets1 += H
-						else if(H in enemies)
-							if(theirarmor < 30)
-								targets2 += H
-							else
-								targets3 += H
-						else
-							targets3 += H
-					else if(ai_target_method == TS_DAMAGE_POISON)
-						if(H.can_inject(null,0,"chest",0))
-							targets1 += H
-						else if(H in enemies)
-							targets2 += H
-						else
-							targets3 += H
-					else
-						// TS_DAMAGE_SIMPLE
-						if(H in enemies)
-							targets2 += H
-						else
-							targets3 += H
-			else if(istype(H, /mob/living/simple_animal))
-				var/mob/living/simple_animal/hostile/poison/terror_spider/M = H
-				if(M.force_threshold > melee_damage_upper)
-					// If it has such high armor it can ignore any attack we make on it, ignore it.
-				else if(M in enemies)
-					targets2 += M
-				else
-					targets3 += M
+	for(var/mob/living/H in view(src, vision_range))
+		if(H.stat == DEAD)
+			continue
+		if(H.flags & GODMODE)
+			continue
+		if(H.stat == UNCONSCIOUS && !stat_attack)
+			continue
+		if(ai_type == TS_AI_DEFENSIVE && !(H in enemies))
+			continue
+		if(isterrorspider(H))
+			if(H in enemies)
+				targets3 += H
+			continue
+		if(iscarbon(H))
+			var/mob/living/carbon/C = H
+			if(IsInfected(C)) // only target the infected if they're attacking us. Even then, lowest priority.
+				if(C in enemies)
+					targets3 += C
+					continue
+			else if(C.reagents.has_reagent("terror_black_toxin",30))
+				// only target those dying of black spider venom if they are close, or our enemy
+				if(get_dist(src,C) <= 2 || (C in enemies))
+					targets2 += C
 			else
-				if(H in enemies)
-					targets2 += H
+				// Target prioritization by spider type. BRUTE spiders prioritize lower armor values, POISON prioritize poisonable
+				if(ai_target_method == TS_DAMAGE_BRUTE)
+					var/theirarmor = C.getarmor(type = "melee")
+					// Example values: Civilian: 2, Engineer w/ Hardsuit: 10, Sec Officer with armor: 19, HoS: 48, Deathsquad: 80
+					if(theirarmor < 10)
+						targets1 += C
+					else if(C in enemies)
+						if(theirarmor < 30)
+							targets2 += C
+						else
+							targets3 += C
+					else
+						targets3 += C
+				else if(ai_target_method == TS_DAMAGE_POISON)
+					if(C.can_inject(null,0,"chest",0))
+						targets1 += C
+					else if(C in enemies)
+						targets2 += C
+					else
+						targets3 += C
 				else
-					targets3 += H
-		if(health < maxHealth)
-			// very unlikely that we're being shot at by a mech or space pod - so only check for this if our health is lower than max.
-			for(var/obj/mecha/M in view(src, vision_range))
-				if(get_dist(M, src) <= 2)
-					targets2 += M
-				else
-					targets3 += M
-			for(var/obj/spacepod/S in view(src, vision_range))
-				targets3 += S
-		if(targets1.len)
-			return targets1
-		else if(targets2.len)
-			return targets2
+					// TS_DAMAGE_SIMPLE
+					if(C in enemies)
+						targets2 += C
+					else
+						targets3 += C
 		else
-			return targets3
-	else if(ai_type == TS_AI_DEFENSIVE)
-		for(var/mob/living/H in view(src, vision_range))
-			if(H.stat == DEAD)
-				// dead mobs are ALWAYS ignored.
-			else if(!stat_attack && H.stat == UNCONSCIOUS)
-				// unconscious mobs are ignored unless spider has stat_attack
-			else if(H in enemies)
-				targets1 += H
-		if(health < maxHealth)
-			// very unlikely that we're being shot at by a mech or space pod - so only check for this if our health is lower than max.
-			for(var/obj/mecha/M in view(src, vision_range))
-				if(M in enemies)
-					targets1 += M
-			for(var/obj/spacepod/S in view(src, vision_range))
-				if(S in enemies)
-					targets1 += S
+			if(istype(H,/mob/living/simple_animal))
+				var/mob/living/simple_animal/S = H
+				if(S.force_threshold > melee_damage_upper)
+					continue
+			if(H in enemies)
+				targets2 += H
+			else
+				targets3 += H
+	if(health < maxHealth)
+		// if we're hurt, and ONLY if we're hurt, do the additional check for mechs/space pods
+		for(var/obj/mecha/M in view(src, vision_range))
+			if(get_dist(M, src) <= 2)
+				targets2 += M
+			else
+				targets3 += M
+		for(var/obj/spacepod/S in view(src, vision_range))
+			targets3 += S
+	if(targets1.len)
 		return targets1
-	else if(ai_type == TS_AI_PASSIVE)
-		return list()
+	if(targets2.len)
+		return targets2
+	return targets3
+
 
 /mob/living/simple_animal/hostile/poison/terror_spider/LoseTarget()
 	if(target && isliving(target))
@@ -213,7 +181,7 @@
 			continue
 		if(A in enemies)
 			continue
-		if(istype(A, /mob/living/simple_animal/hostile/poison/terror_spider))
+		if(isterrorspider(A))
 			ts_nearby += A
 			continue
 		if(isliving(A))
@@ -314,8 +282,7 @@
 						var/area/new_area = get_area(loc)
 						if(new_area)
 							new_area.Entered(src)
-						if(!istype(src, /mob/living/simple_animal/hostile/poison/terror_spider/gray))
-							visible_message("<B>[src] emerges from the vent!</B>")
+
 
 // --------------------------------------------------------------------------------
 // --------------------- TERROR SPIDERS: ENVIRONMENT CODE -------------------------

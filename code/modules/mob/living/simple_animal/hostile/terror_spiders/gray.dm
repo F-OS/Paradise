@@ -30,6 +30,21 @@
 	vision_type = null // prevent them seeing through walls when doing AOE web.
 
 
+/mob/living/simple_animal/hostile/poison/terror_spider/gray/spider_specialattack(mob/living/carbon/human/L, poisonable)
+	if(!poisonable)
+		..()
+		return
+	if(L.silent >= 10)
+		L.attack_animal(src)
+	else
+		var/inject_target = pick("chest","head")
+		if(L.stunned || L.can_inject(null,0,inject_target,0))
+			L.silent = max(L.silent, 20) // instead of having a venom that only lasts seconds, we just add the silence directly.
+			visible_message("<span class='danger'>[src] buries grey fangs deep into the [inject_target] of [target]!</span>")
+		else
+			visible_message("<span class='danger'>[src] bites [target], but cannot inject venom into their [inject_target]!</span>")
+		L.attack_animal(src)
+
 /mob/living/simple_animal/hostile/poison/terror_spider/gray/adjustBruteLoss(damage)
 	..(damage)
 	if(invisibility > 0 || icon_state == "terror_gray_cloaked")
@@ -127,18 +142,3 @@
 				if(get_dist(src,temp_vent) > 0 && get_dist(src,temp_vent) < 5)
 					step_to(src,temp_vent)
 					// if you're bumped off your vent, try to get back to it
-
-/mob/living/simple_animal/hostile/poison/terror_spider/gray/spider_specialattack(mob/living/carbon/human/L, poisonable)
-	if(!poisonable)
-		..()
-		return
-	if(L.silent >= 10)
-		L.attack_animal(src)
-	else
-		var/inject_target = pick("chest","head")
-		if(L.stunned || L.can_inject(null,0,inject_target,0))
-			L.silent = max(L.silent, 20) // instead of having a venom that only lasts seconds, we just add the silence directly.
-			visible_message("<span class='danger'>[src] buries grey fangs deep into the [inject_target] of [target]!</span>")
-		else
-			visible_message("<span class='danger'>[src] bites [target], but cannot inject venom into their [inject_target]!</span>")
-		L.attack_animal(src)
