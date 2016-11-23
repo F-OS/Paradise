@@ -46,3 +46,6 @@
 		degenerate = 1
 	..()
 
+/mob/living/simple_animal/hostile/poison/terror_spider/mother/Destroy()
+	canspawn = 0
+	..()

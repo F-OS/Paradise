@@ -35,7 +35,7 @@
 
 
 /mob/living/simple_animal/hostile/poison/terror_spider/prince/death(gibbed)
-	if(!hasdroppedloot)
+	if(!hasdied)
 		if(spider_uo71)
 			UnlockBlastDoors("UO71_SciStorage", "UO71 Secure Science Storage is now unlocked!")
 	..()

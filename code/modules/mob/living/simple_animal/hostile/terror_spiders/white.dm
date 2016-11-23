@@ -34,7 +34,7 @@
 	..()
 
 /mob/living/simple_animal/hostile/poison/terror_spider/white/death(gibbed)
-	if(!hasdroppedloot)
+	if(!hasdied)
 		if(spider_uo71)
 			UnlockBlastDoors("UO71_Bridge", "UO71 Bridge is now unlocked!")
 	..()

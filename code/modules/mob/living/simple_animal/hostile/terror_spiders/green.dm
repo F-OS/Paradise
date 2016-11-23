@@ -67,7 +67,7 @@
 				step_to(src,cocoon_target)
 				if(spider_debug)
 					visible_message("<span class='notice'>\The [src] moves towards [cocoon_target] to cocoon it.</span>")
-	else if(fed)
+	else if(fed >= feedings_to_lay)
 		DoLayGreenEggs()
 	else if(world.time > (last_cocoon_object + freq_cocoon_object))
 		last_cocoon_object = world.time

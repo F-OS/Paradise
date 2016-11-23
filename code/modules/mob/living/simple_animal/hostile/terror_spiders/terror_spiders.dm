@@ -125,7 +125,7 @@ var/global/list/ts_spiderling_list = list()
 	var/killcount = 0
 	var/busy = 0 // leave this alone!
 	var/spider_tier = TS_TIER_1 // 1 for red,gray,green. 2 for purple,black,white, 3 for prince, mother. 4 for queen, 5 for empress.
-	var/hasdroppedloot = 0
+	var/hasdied = 0
 	var/list/spider_special_drops = list()
 	var/attackstep = 0
 	var/attackcycles = 0
@@ -300,6 +300,7 @@ var/global/list/ts_spiderling_list = list()
 
 /mob/living/simple_animal/hostile/poison/terror_spider/Destroy()
 	ts_spiderlist -= src
+	handle_dying()
 	return ..()
 
 /mob/living/simple_animal/hostile/poison/terror_spider/Life()
@@ -326,17 +327,20 @@ var/global/list/ts_spiderling_list = list()
 	..()
 
 
-/mob/living/simple_animal/hostile/poison/terror_spider/death(gibbed)
-	if(!gibbed)
-		msg_terrorspiders("[src] has died in [get_area(src)].")
-	if(!hasdroppedloot)
-		hasdroppedloot = 1
+/mob/living/simple_animal/hostile/poison/terror_spider/proc/handle_dying()
+	if(!hasdied)
+		hasdied = 1
 		ts_count_dead++
 		ts_death_last = world.time
 		if(spider_awaymission)
 			ts_count_alive_awaymission--
 		else
 			ts_count_alive_station--
+
+/mob/living/simple_animal/hostile/poison/terror_spider/death(gibbed)
+	if(!gibbed)
+		msg_terrorspiders("[src] has died in [get_area(src)].")
+	handle_dying()
 	..()
 
 
