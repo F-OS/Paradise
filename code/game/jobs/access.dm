@@ -132,7 +132,6 @@ var/const/access_trade_sol = 160
 
 	return 0
 
-
 /obj/item/proc/GetAccess()
 	return list()
 
