@@ -13,6 +13,7 @@
 	icon = 'icons/obj/items.dmi'
 	icon_state = "gift1"
 	item_state = "gift1"
+	burn_state = FLAMMABLE
 
 /obj/item/weapon/a_gift/New()
 	..()
@@ -30,7 +31,7 @@
 		user.put_in_active_hand(gift)
 		src.gift.add_fingerprint(user)
 	else
-		user << "\blue The gift was empty!"
+		to_chat(user, "\blue The gift was empty!")
 	qdel(src)
 	return
 
@@ -39,22 +40,22 @@
 	return
 
 /obj/effect/spresent/relaymove(mob/user as mob)
-	if (user.stat)
+	if(user.stat)
 		return
-	user << "\blue You cant move."
+	to_chat(user, "\blue You cant move.")
 
 /obj/effect/spresent/attackby(obj/item/weapon/W as obj, mob/user as mob, params)
 	..()
 
-	if (!istype(W, /obj/item/weapon/wirecutters))
-		user << "\blue I need wirecutters for that."
+	if(!istype(W, /obj/item/weapon/wirecutters))
+		to_chat(user, "\blue I need wirecutters for that.")
 		return
 
-	user << "\blue You cut open the present."
+	to_chat(user, "\blue You cut open the present.")
 
 	for(var/mob/M in src) //Should only be one but whatever.
 		M.loc = src.loc
-		if (M.client)
+		if(M.client)
 			M.client.eye = M.client.mob
 			M.client.perspective = MOB_PERSPECTIVE
 
@@ -80,7 +81,7 @@
 		/obj/item/weapon/banhammer,
 		/obj/item/toy/balloon,
 		/obj/item/toy/blink,
-		/obj/item/toy/crossbow,
+		/obj/item/weapon/gun/projectile/shotgun/toy/crossbow,
 		/obj/item/weapon/gun/projectile/revolver/capgun,
 		/obj/item/toy/katana,
 		/obj/random/mech,
@@ -115,7 +116,7 @@
 		/obj/item/toy/AI,
 		/obj/item/clothing/under/syndicate/tacticool,
 		/obj/item/weapon/storage/box/fakesyndiesuit,
-		/obj/item/toy/crossbow/tommygun,
+		/obj/item/weapon/gun/projectile/shotgun/toy/tommygun,
 		/obj/item/stack/tile/fakespace/loaded,
 		)
 
@@ -139,6 +140,7 @@
 	flags = NOBLUDGEON
 	amount = 25
 	max_amount = 25
+	burn_state = FLAMMABLE
 
 /obj/item/stack/wrapping_paper/attack_self(mob/user)
-	user << "<span class='notice'>You need to use it on a package that has already been wrapped!</span>"
+	to_chat(user, "<span class='notice'>You need to use it on a package that has already been wrapped!</span>")

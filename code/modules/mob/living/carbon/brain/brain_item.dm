@@ -4,7 +4,7 @@
 	max_damage = 200
 	icon_state = "brain2"
 	force = 1.0
-	w_class = 2.0
+	w_class = 2
 	throwforce = 1.0
 	throw_speed = 3
 	throw_range = 5
@@ -15,17 +15,22 @@
 	parent_organ = "head"
 	slot = "brain"
 	vital = 1
+	var/mmi_icon = 'icons/obj/assemblies.dmi'
+	var/mmi_icon_state = "mmi_full"
 
 /obj/item/organ/internal/brain/surgeryize()
 	if(!owner)
 		return
-	owner.ear_damage = 0 //Yeah, didn't you...hear? The ears are totally inside the brain.
-	owner.ear_deaf = 0
+	owner.SetEarDeaf(0)
+	owner.SetEarDamage(0) //Yeah, didn't you...hear? The ears are totally inside the brain.
 
 /obj/item/organ/internal/brain/xeno
-	name = "thinkpan"
-	desc = "It looks kind of like an enormous wad of purple bubblegum."
-	icon_state = "brain-x-d"
+	name = "xenomorph brain"
+	desc = "We barely understand the brains of terrestial animals. Who knows what we may find in the brain of such an advanced species?"
+	icon_state = "brain-x"
+	origin_tech = "biotech=7"
+	mmi_icon = 'icons/mob/alien.dmi'
+	mmi_icon_state = "AlienMMI"
 
 /obj/item/organ/internal/brain/New()
 	..()
@@ -36,7 +41,7 @@
 /obj/item/organ/internal/brain/proc/transfer_identity(var/mob/living/carbon/H)
 	brainmob = new(src)
 	if(isnull(dna)) // someone didn't set this right...
-		log_to_dd("[src] at [loc] did not contain a dna datum at time of removal.")
+		log_runtime(EXCEPTION("[src] at [loc] did not contain a dna datum at time of removal."), src)
 		dna = H.dna.Clone()
 	name = "\the [dna.real_name]'s [initial(src.name)]"
 	brainmob.dna = dna.Clone() // Silly baycode, what you do
@@ -47,17 +52,19 @@
 	if(H.mind)
 		H.mind.transfer_to(brainmob)
 
-	brainmob << "<span class='notice'>You feel slightly disoriented. That's normal when you're just a [initial(src.name)].</span>"
+	to_chat(brainmob, "<span class='notice'>You feel slightly disoriented. That's normal when you're just a [initial(src.name)].</span>")
 	callHook("debrain", list(brainmob))
 
 /obj/item/organ/internal/brain/examine(mob/user) // -- TLE
 	..(user)
 	if(brainmob && brainmob.client)//if thar be a brain inside... the brain.
-		user << "You can feel the small spark of life still left in this one."
+		to_chat(user, "You can feel the small spark of life still left in this one.")
 	else
-		user << "This one seems particularly lifeless. Perhaps it will regain some of its luster later.."
+		to_chat(user, "This one seems particularly lifeless. Perhaps it will regain some of its luster later..")
 
 /obj/item/organ/internal/brain/remove(var/mob/living/user,special = 0)
+	if(dna)
+		name = "[dna.real_name]'s [initial(name)]"
 
 	if(!owner) return ..() // Probably a redundant removal; just bail
 
@@ -67,17 +74,17 @@
 
 		if(borer)
 			borer.detatch() //Should remove borer if the brain is removed - RR
-
-		B.transfer_identity(user)
+		if(owner.mind && !non_primary)//don't transfer if the owner does not have a mind.
+			B.transfer_identity(user)
 
 	if(istype(owner,/mob/living/carbon/human))
 		var/mob/living/carbon/human/H = owner
 		H.update_hair(1)
-	..()
+	. = ..()
 
 /obj/item/organ/internal/brain/insert(var/mob/living/target,special = 0)
 
-	name = "brain"
+	name = "[initial(name)]"
 	var/brain_already_exists = 0
 	if(istype(target,/mob/living/carbon/human)) // No more IPC multibrain shenanigans
 		if(target.get_int_organ(/obj/item/organ/internal/brain))
@@ -94,7 +101,9 @@
 				brainmob.mind.transfer_to(target)
 			else
 				target.key = brainmob.key
-	..()
+	else
+		log_debug("Multibrain shenanigans at ([target.x],[target.y],[target.z]), mob '[target]'")
+	..(target, special = special)
 
 /obj/item/organ/internal/brain/prepare_eat()
 	return // Too important to eat.
@@ -104,6 +113,14 @@
 	desc = "A complex, organic knot of jelly and crystalline particles."
 	icon = 'icons/mob/slimes.dmi'
 	icon_state = "green slime extract"
+	mmi_icon_state = "slime_mmi"
+//	parent_organ = "chest" Hello I am from the ministry of rubber forehead aliens how are you
+
+/obj/item/organ/internal/brain/slime/take_damage(var/amount, var/silent = 1)
+	//Slimes are 150% more vulnerable to brain damage
+	damage = between(0, src.damage + (1.5*amount), max_damage) //Since they take the damage twice, this is +150%
+	return ..()
+
 
 /obj/item/organ/internal/brain/golem
 	name = "Runic mind"

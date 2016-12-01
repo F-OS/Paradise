@@ -2,7 +2,7 @@
 	//Head accessory styles
 var/global/list/head_accessory_styles_list = list() //stores /datum/sprite_accessory/head_accessory indexed by name
 	//Marking styles
-var/global/list/marking_styles_list = list() //stores /datum/sprite_accessory/horns indexed by name
+var/global/list/marking_styles_list = list() //stores /datum/sprite_accessory/body_markings indexed by name
 	//Hairstyles
 var/global/list/hair_styles_list = list()			//stores /datum/sprite_accessory/hair indexed by name
 var/global/list/hair_styles_male_list = list()
@@ -23,6 +23,8 @@ var/global/list/undershirt_f = list()	 //stores only undershirt name
 var/global/list/socks_list = list()		//stores /datum/sprite_accessory/socks indexed by name
 var/global/list/socks_m = list()	 //stores only socks name
 var/global/list/socks_f = list()	 //stores only socks name
+	//Alt Heads
+var/global/list/alt_heads_list = list()	//stores /datum/sprite_accessory/alt_heads indexed by name
 	//Backpacks
 var/global/list/backbaglist = list("Nothing", "Backpack", "Satchel", "Satchel Alt")
 
@@ -42,6 +44,6 @@ var/list/TAGGERLOCATIONS = list("Disposals",
 	"Atmospherics", "HoS Office", "Security", "Medbay",
 	"CMO Office", "Chemistry", "Research", "RD Office",
 	"Robotics", "HoP Office", "Library", "Chapel", "Captain's Office",
-	"Bar", "Kitchen", "Hydroponics", "Janitor Closet","Genetics")
+	"Bar", "Kitchen", "Hydroponics", "Janitor Closet","Genetics","Brig Physician")
 
 var/list/hit_appends = list("-OOF", "-ACK", "-UGH", "-HRNK", "-HURGH", "-GLORF")

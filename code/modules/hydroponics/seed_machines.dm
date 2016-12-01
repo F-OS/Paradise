@@ -3,7 +3,7 @@
 	desc = "A small disk used for carrying data on plant genetics."
 	icon = 'icons/obj/hydroponics_machines.dmi'
 	icon_state = "disk"
-	w_class = 1.0
+	w_class = 1
 
 	var/list/genes = list()
 	var/genesource = "unknown"
@@ -17,7 +17,7 @@
 	if(genes.len)
 		var/choice = alert(user, "Are you sure you want to wipe the disk?", "Xenobotany Data", "No", "Yes")
 		if(src && user && genes && choice && choice == "Yes" && user.Adjacent(get_turf(src)))
-			user << "You wipe the disk data."
+			to_chat(user, "You wipe the disk data.")
 			name = initial(name)
 			desc = initial(name)
 			genes = list()
@@ -68,35 +68,35 @@
 	active = 0
 	if(failed_task)
 		failed_task = 0
-		visible_message("\icon[src] [src] pings unhappily, flashing a red warning light.")
+		visible_message("[bicon(src)] [src] pings unhappily, flashing a red warning light.")
 	else
-		visible_message("\icon[src] [src] pings happily.")
+		visible_message("[bicon(src)] [src] pings happily.")
 
 	if(eject_disk)
 		eject_disk = 0
 		if(loaded_disk)
 			loaded_disk.loc = get_turf(src)
-			visible_message("\icon[src] [src] beeps and spits out [loaded_disk].")
+			visible_message("[bicon(src)] [src] beeps and spits out [loaded_disk].")
 			loaded_disk = null
 
 /obj/machinery/botany/attackby(obj/item/weapon/W as obj, mob/user as mob)
 	if(istype(W,/obj/item/seeds))
 		if(seed)
-			user << "There is already a seed loaded."
+			to_chat(user, "There is already a seed loaded.")
 			return
 		var/obj/item/seeds/S =W
 		if(S.seed && S.seed.get_trait(TRAIT_IMMUTABLE) > 0)
-			user << "That seed is not compatible with our genetics technology."
+			to_chat(user, "That seed is not compatible with our genetics technology.")
 		else
 			user.drop_item(W)
 			W.loc = src
 			seed = W
-			user << "You load [W] into [src]."
+			to_chat(user, "You load [W] into [src].")
 		return
 
 	if(istype(W,/obj/item/weapon/screwdriver))
 		open = !open
-		user << "<span class='notice'>You [open ? "open" : "close"] the maintenance panel.</span>"
+		to_chat(user, "<span class='notice'>You [open ? "open" : "close"] the maintenance panel.</span>")
 		return
 
 	if(open)
@@ -106,24 +106,24 @@
 
 	if(istype(W,/obj/item/weapon/disk/botany))
 		if(loaded_disk)
-			user << "There is already a data disk loaded."
+			to_chat(user, "There is already a data disk loaded.")
 			return
 		else
 			var/obj/item/weapon/disk/botany/B = W
 
 			if(B.genes && B.genes.len)
 				if(!disk_needs_genes)
-					user << "That disk already has gene data loaded."
+					to_chat(user, "That disk already has gene data loaded.")
 					return
 			else
 				if(disk_needs_genes)
-					user << "That disk does not have any gene data loaded."
+					to_chat(user, "That disk does not have any gene data loaded.")
 					return
 
 			user.drop_item(W)
 			W.loc = src
 			loaded_disk = W
-			user << "You load [W] into [src]."
+			to_chat(user, "You load [W] into [src].")
 
 		return
 	..()
@@ -136,6 +136,26 @@
 	var/datum/seed/genetics // Currently scanned seed genetic structure.
 	var/degradation = 0     // Increments with each scan, stops allowing gene mods after a certain point.
 
+	var/degrade_lower = 20
+	var/degrade_upper = 60
+
+/obj/machinery/botany/extractor/New()
+	..()
+
+	component_parts = list()
+	component_parts += new /obj/item/weapon/circuitboard/botany_extractor(null)
+	component_parts += new /obj/item/weapon/stock_parts/matter_bin(null)
+	component_parts += new /obj/item/weapon/stock_parts/scanning_module(null)
+	component_parts += new /obj/item/weapon/stock_parts/console_screen(null)
+	RefreshParts()
+
+/obj/machinery/botany/extractor/RefreshParts()
+	var/tier = 1
+	for(var/obj/item/weapon/stock_parts/scanning_module/S in component_parts)
+		tier = S.rating
+	degrade_lower = 25 - (tier * 5)		//Tier 1: 20, Tier 4: 5
+	degrade_upper = 70 - (tier * 10)	//Tier 1: 60, Tier 4: 30
+
 /obj/machinery/botany/extractor/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
 
 	if(!user)
@@ -144,8 +164,8 @@
 	var/list/data = list()
 
 	var/list/geneMasks[0]
-	for(var/gene_tag in plant_controller.gene_tag_masks)
-		geneMasks.Add(list(list("tag" = gene_tag, "mask" = plant_controller.gene_tag_masks[gene_tag])))
+	for(var/gene_tag in plant_controller.gene_tag_list)
+		geneMasks.Add(gene_tag)
 	data["geneMasks"] = geneMasks
 
 	data["activity"] = active
@@ -171,7 +191,7 @@
 		data["sourceName"] = 0
 
 	ui = nanomanager.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
+	if(!ui)
 		ui = new(user, src, ui_key, "botany_isolator.tmpl", "Lysis-isolation Centrifuge UI", 470, 450)
 		ui.set_initial_data(data)
 		ui.open()
@@ -192,14 +212,14 @@
 			plant_controller.seeds[seed.seed.name] = seed.seed
 
 		seed.update_seed()
-		visible_message("\icon[src] [src] beeps and spits out [seed].")
+		visible_message("[bicon(src)] [src] beeps and spits out [seed].")
 
 		seed = null
 
 	if(href_list["eject_disk"])
 		if(!loaded_disk) return
 		loaded_disk.loc = get_turf(src)
-		visible_message("\icon[src] [src] beeps and spits out [loaded_disk].")
+		visible_message("[bicon(src)] [src] beeps and spits out [loaded_disk].")
 		loaded_disk = null
 
 	usr.set_machine(src)
@@ -242,11 +262,11 @@
 		if(!genetics.roundstart)
 			loaded_disk.genesource += " (variety #[genetics.uid])"
 
-		loaded_disk.name += " ([plant_controller.gene_tag_masks[href_list["get_gene"]]], #[genetics.uid])"
-		loaded_disk.desc += " The label reads \'gene [plant_controller.gene_tag_masks[href_list["get_gene"]]], sampled from [genetics.display_name]\'."
+		loaded_disk.name += " ([href_list["get_gene"]], #[genetics.uid])"
+		loaded_disk.desc += " The label reads \'[href_list["get_gene"]] gene, sampled from [genetics.display_name]\'."
 		eject_disk = 1
 
-		degradation += rand(20,60)
+		degradation += rand(degrade_lower, degrade_upper)
 		if(degradation >= 100)
 			failed_task = 1
 			genetics = null
@@ -266,6 +286,26 @@
 	name = "bioballistic delivery system"
 	icon_state = "traitgun"
 	disk_needs_genes = 1
+
+	var/degrade_lower = 5
+	var/degrade_upper = 10
+
+/obj/machinery/botany/editor/New()
+	..()
+
+	component_parts = list()
+	component_parts += new /obj/item/weapon/circuitboard/botany_editor(null)
+	component_parts += new /obj/item/weapon/stock_parts/matter_bin(null)
+	component_parts += new /obj/item/weapon/stock_parts/manipulator(null)
+	component_parts += new /obj/item/weapon/stock_parts/console_screen(null)
+	RefreshParts()
+
+/obj/machinery/botany/editor/RefreshParts()
+	var/tier = 1
+	for(var/obj/item/weapon/stock_parts/manipulator/M in component_parts)
+		tier = M.rating
+	degrade_lower = 6 - tier		//Tier 1: 5, Tier 4: 1
+	degrade_upper = 11 - tier		//Tier 1: 10, Tier 4: 6
 
 /obj/machinery/botany/editor/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
 
@@ -288,7 +328,7 @@
 
 		for(var/datum/plantgene/P in loaded_disk.genes)
 			if(data["locus"] != "") data["locus"] += ", "
-			data["locus"] += "[plant_controller.gene_tag_masks[P.genetype]]"
+			data["locus"] += "[plant_controller.gene_tag_list[P.genetype]]"
 
 	else
 		data["disk"] = 0
@@ -301,7 +341,7 @@
 		data["loaded"] = 0
 
 	ui = nanomanager.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
+	if(!ui)
 		ui = new(user, src, ui_key, "botany_editor.tmpl", "Bioballistic Delivery UI", 470, 450)
 		ui.set_initial_data(data)
 		ui.open()
@@ -329,7 +369,7 @@
 
 		for(var/datum/plantgene/gene in loaded_disk.genes)
 			seed.seed.apply_gene(gene)
-			seed.modified += rand(5,10)
+			seed.modified += rand(degrade_lower, degrade_upper)
 
 	usr.set_machine(src)
 	src.add_fingerprint(usr)

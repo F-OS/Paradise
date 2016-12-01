@@ -13,6 +13,7 @@
 	var/germ_level = GERM_LEVEL_AMBIENT // The higher the germ level, the more germ on the atom.
 	var/simulated = 1 //filter for actions - used by lighting overlays
 	var/atom_say_verb = "says"
+	var/dont_save = 0 // For atoms that are temporary by necessity - like lighting overlays
 
 	///Chemistry.
 	var/datum/reagents/reagents = null
@@ -41,7 +42,7 @@
 	if(!T)
 		return 0
 
-	if(T.z != ZLEVEL_CENTCOMM)//if not, don't bother
+	if(!is_admin_level(T.z))//if not, don't bother
 		return 0
 
 	//check for centcomm shuttles
@@ -58,7 +59,7 @@
 	if(!T)
 		return 0
 
-	if(T.z != ZLEVEL_CENTCOMM)//if not, don't bother
+	if(!is_admin_level(T.z))//if not, don't bother
 		return 0
 
 	if(istype(T.loc, /area/shuttle/syndicate_elite) || istype(T.loc, /area/syndicate_mothership))
@@ -67,14 +68,31 @@
 	return 0
 
 /atom/Destroy()
+	if(alternate_appearances)
+		for(var/aakey in alternate_appearances)
+			var/datum/alternate_appearance/AA = alternate_appearances[aakey]
+			qdel(AA)
+		alternate_appearances = null
+
 	if(reagents)
 		qdel(reagents)
 		reagents = null
 	invisibility = 101
 	return ..()
 
-/atom/proc/CheckParts()
-	return
+/atom/proc/CheckParts(list/parts_list)
+	for(var/A in parts_list)
+		if(istype(A, /datum/reagent))
+			if(!reagents)
+				reagents = new()
+			reagents.reagent_list.Add(A)
+			reagents.conditional_update()
+		else if(istype(A, /atom/movable))
+			var/atom/movable/M = A
+			if(istype(M.loc, /mob/living))
+				var/mob/living/L = M.loc
+				L.unEquip(M)
+			M.forceMove(src)
 
 /atom/proc/assume_air(datum/gas_mixture/giver)
 	qdel(giver)
@@ -90,7 +108,7 @@
 		return null
 
 /atom/proc/check_eye(user as mob)
-	if (istype(user, /mob/living/silicon/ai)) // WHYYYY
+	if(istype(user, /mob/living/silicon/ai)) // WHYYYY
 		return 1
 	return
 
@@ -181,20 +199,21 @@
 		else
 			f_name += "oil-stained [name][infix]."
 
-	user << "\icon[src] That's [f_name] [suffix]"
-	user << desc
+	to_chat(user, "[bicon(src)] That's [f_name] [suffix]")
+	if(desc)
+		to_chat(user, desc)
 
 	if(reagents && is_open_container()) //is_open_container() isn't really the right proc for this, but w/e
-		user << "It contains:"
+		to_chat(user, "It contains:")
 		if(reagents.reagent_list.len)
 			if(user.can_see_reagents()) //Show each individual reagent
 				for(var/datum/reagent/R in reagents.reagent_list)
-					user << "[R.volume] units of [R.name]"
+					to_chat(user, "[R.volume] units of [R.name]")
 			else //Otherwise, just show the total volume
 				if(reagents && reagents.reagent_list.len)
-					user << "[reagents.total_volume] units of various reagents."
+					to_chat(user, "[reagents.total_volume] units of various reagents.")
 		else
-			user << "Nothing."
+			to_chat(user, "Nothing.")
 
 	return distance == -1 || (get_dist(src, user) <= distance) || isobserver(user) //observers do not have a range limit
 
@@ -219,7 +238,7 @@
 	return
 
 /atom/proc/hitby(atom/movable/AM as mob|obj)
-	if (density)
+	if(density)
 		AM.throwing = 0
 	return
 
@@ -269,14 +288,14 @@
 		add_fibers(M)
 
 		//He has no prints!
-		if (FINGERPRINTS in M.mutations)
+		if(FINGERPRINTS in M.mutations)
 			if(fingerprintslast != M.key)
 				fingerprintshidden += "(Has no fingerprints) Real name: [M.real_name], Key: [M.key]"
 				fingerprintslast = M.key
 			return 0		//Now, lets get to the dirty work.
 		//First, make sure their DNA makes sense.
 		var/mob/living/carbon/human/H = M
-		if (!istype(H.dna, /datum/dna) || !H.dna.uni_identity || (length(H.dna.uni_identity) != 32))
+		if(!istype(H.dna, /datum/dna) || !H.dna.uni_identity || (length(H.dna.uni_identity) != 32))
 			if(!istype(H.dna, /datum/dna))
 				H.dna = new /datum/dna(null)
 				H.dna.real_name = H.real_name
@@ -346,23 +365,36 @@
 //returns 1 if made bloody, returns 0 otherwise
 /atom/proc/add_blood(mob/living/carbon/human/M as mob)
 
-	if(flags & NOBLOODY)
-		return 0
-
 	if(!blood_DNA || !istype(blood_DNA, /list))	//if our list of DNA doesn't exist yet (or isn't a list) initialise it.
 		blood_DNA = list()
 
 	blood_color = "#A10808"
 	if(istype(M))
-		if (!istype(M.dna, /datum/dna))
-			M.dna = new /datum/dna(null)
-			M.dna.real_name = M.real_name
+		if(M.species.flags & NO_BLOOD)
+			return 0
 		M.check_dna()
-		if (M.species)
-			blood_color = M.species.blood_color
+		blood_color = M.species.blood_color
+
 	. = 1
 	return 1
 
+/atom/proc/add_blood_list(mob/living/carbon/M)
+	// Returns 0 if we have that blood already
+	if(!istype(blood_DNA, /list))	//if our list of DNA doesn't exist yet (or isn't a list) initialise it.
+		blood_DNA = list()
+	//if this blood isn't already in the list, add it
+	if(blood_DNA[M.dna.unique_enzymes])
+		return 0 //already bloodied with this blood. Cannot add more.
+	var/blood_type = "X*"
+	if(ishuman(M))
+		var/mob/living/carbon/human/H = M
+		blood_type = H.b_type
+	blood_DNA[M.dna.unique_enzymes] = blood_type
+	return 1
+
+// Only adds blood on the floor -- Skie
+/atom/proc/add_blood_floor(mob/living/carbon/M)
+	return //why the fuck this is at an atom level but only works on simulated turfs I don't know
 
 /atom/proc/clean_blood()
 	src.germ_level = 0
@@ -378,10 +410,6 @@
 		if(toxvomit)
 			this.icon_state = "vomittox_[pick(1,4)]"
 
-/atom/proc/add_poop_floor(mob/living/carbon/M as mob)
-	if( istype(src, /turf/simulated) )
-		new /obj/effect/decal/cleanable/poop(src)
-
 
 /atom/proc/get_global_map_pos()
 	if(!islist(global_map) || isemptylist(global_map)) return
@@ -393,7 +421,7 @@
 		cur_y = y_arr.Find(src.z)
 		if(cur_y)
 			break
-//	world << "X = [cur_x]; Y = [cur_y]"
+//	to_chat(world, "X = [cur_x]; Y = [cur_y]")
 	if(cur_x && cur_y)
 		return list("x"=cur_x,"y"=cur_y)
 	else
@@ -420,11 +448,10 @@
 /atom/proc/narsie_act()
 	return
 
-/atom/proc/atom_say(var/message)
-	if((!message))
+/atom/proc/atom_say(message)
+	if(!message)
 		return
-	for(var/mob/O in hearers(src, null))
-		O.show_message("<span class='game say'><span class='name'>[src]</span> [atom_say_verb], \"[message]\"</span>",2)
+	audible_message("<span class='game say'><span class='name'>[src]</span> [atom_say_verb], \"[message]\"</span>")
 
 /atom/proc/speech_bubble(var/bubble_state = "",var/bubble_loc = src, var/list/bubble_recipients = list())
 	return

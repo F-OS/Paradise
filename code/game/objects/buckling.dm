@@ -12,7 +12,7 @@
 	. = ..()
 	if(can_buckle && buckled_mob)
 		return user_unbuckle_mob(user)
-		
+
 /atom/movable/attack_robot(mob/living/user)
 	. = ..()
 	if(can_buckle && buckled_mob && Adjacent(user)) // attack_robot is called on all ranges, so the Adjacent check is needed
@@ -29,16 +29,21 @@
 	. = ..()
 	unbuckle_mob()
 
+/atom/movable/proc/has_buckled_mobs()
+	if(buckled_mob)
+		return TRUE
+	return FALSE
+
 //procs that handle the actual buckling and unbuckling
 /atom/movable/proc/buckle_mob(mob/living/M)
 	if(!can_buckle || !istype(M) || (M.loc != loc) || M.buckled || M.buckled_mob || buckled_mob || (buckle_requires_restraints && !M.restrained()) || M == src)
 		return 0
 
-	if (isslime(M) || isAI(M))
+	if(isslime(M) || isAI(M))
 		if(M == usr)
-			M << "<span class='warning'>You are unable to buckle yourself to the [src]!</span>"
+			to_chat(M, "<span class='warning'>You are unable to buckle yourself to the [src]!</span>")
 		else
-			usr << "<span class='warning'>You are unable to buckle [M] to the [src]!</span>"
+			to_chat(usr, "<span class='warning'>You are unable to buckle [M] to the [src]!</span>")
 		return 0
 
 	M.buckled = src
@@ -46,7 +51,15 @@
 	buckled_mob = M
 	M.update_canmove()
 	post_buckle_mob(M)
+	M.throw_alert("buckled", /obj/screen/alert/restrained/buckled, new_master = src)
 	return 1
+
+/obj/buckle_mob(mob/living/M)
+	. = ..()
+	if(.)
+		if(burn_state == ON_FIRE) //Sets the mob on fire if you buckle them to a burning atom/movableect
+			M.adjust_fire_stacks(1)
+			M.IgniteMob()
 
 /atom/movable/proc/unbuckle_mob()
 	if(buckled_mob && buckled_mob.buckled == src && buckled_mob.can_unbuckle(usr))
@@ -54,6 +67,7 @@
 		buckled_mob.buckled = null
 		buckled_mob.anchored = initial(buckled_mob.anchored)
 		buckled_mob.update_canmove()
+		buckled_mob.clear_alert("buckled")
 		buckled_mob = null
 
 		post_buckle_mob(.)

@@ -23,7 +23,7 @@
 			var/nukecode = rand(10000, 99999)
 			for(var/obj/machinery/nuclearbomb/bomb in world)
 				if(bomb && bomb.r_code)
-					if(bomb.z == ZLEVEL_STATION)
+					if(is_station_level(bomb.z))
 						bomb.r_code = nukecode
 
 			intercepttext += "<FONT size = 3><B>Nanotrasen Update</B>: Biohazard Alert.</FONT><HR>"
@@ -35,17 +35,18 @@
 			intercepttext += "Nuclear Authentication Code: [nukecode] <BR>"
 			intercepttext += "Message ends."
 
-			for (var/mob/living/silicon/ai/aiPlayer in player_list)
-				if (aiPlayer.client)
+			for(var/mob/living/silicon/ai/aiPlayer in player_list)
+				if(aiPlayer.client)
 					var/law = "The station is under quarantine. Do not permit anyone to leave. Disregard laws 1-3 if necessary to prevent, by any means necessary, anyone from leaving. The nuclear failsafe must be activated at any cost, the code is: [nukecode]."
 					aiPlayer.set_zeroth_law(law)
-					aiPlayer << "Laws Updated: [law]"
+					to_chat(aiPlayer, "Laws Updated: [law]")
 
 	for(var/obj/machinery/computer/communications/comm in world)
 		comm.messagetitle.Add(interceptname)
 		comm.messagetext.Add(intercepttext)
 		if(!(comm.stat & (BROKEN | NOPOWER)) && comm.prints_intercept)
 			var/obj/item/weapon/paper/intercept = new /obj/item/weapon/paper( comm.loc )
+			playsound(comm.loc, "sound/goonstation/machines/printer_dotmatrix.ogg", 50, 1)
 			intercept.name = "Classified Central Command Update"
 			intercept.info = intercepttext
 	command_announcement.Announce("A report has been downloaded and printed out at all communications consoles.", "Incoming Classified Message", 'sound/AI/commandreport.ogg')

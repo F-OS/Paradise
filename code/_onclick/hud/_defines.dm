@@ -35,7 +35,6 @@
 #define ui_swaphand2 "CENTER: 16,SOUTH+1:5"
 #define ui_storage1 "CENTER+1:18,SOUTH:5"
 #define ui_storage2 "CENTER+2:20,SOUTH:5"
-
 #define ui_pda "CENTER+3:22,SOUTH:5"
 
 #define ui_alien_head "4:12,1:5"	//aliens
@@ -43,6 +42,7 @@
 
 #define ui_borg_sensor "CENTER-3:16, SOUTH:5"	//borgs
 #define ui_borg_lamp "CENTER-4:16, SOUTH:5"		//borgs
+#define ui_borg_thrusters "CENTER-5:16, SOUTH:5"//borgs
 #define ui_inv1 "CENTER-2:16,SOUTH:5"			//borgs
 #define ui_inv2 "CENTER-1  :16,SOUTH:5"			//borgs
 #define ui_inv3 "CENTER  :16,SOUTH:5"			//borgs
@@ -65,9 +65,19 @@
 #define ui_zonesel "EAST-1:28,SOUTH:5"
 #define ui_acti_alt "EAST-1:28,SOUTH:5" //alternative intent switcher for when the interface is hidden (F12)
 
+#define ui_crafting	"EAST:-5,SOUTH+2:7"
+
 #define ui_borg_pull "EAST-2:26,SOUTH+1:7"
 #define ui_borg_radio "EAST-1:28,SOUTH+1:7"
 #define ui_borg_intents "EAST-2:26,SOUTH:5"
+
+//Upper-middle right (alerts)
+#define ui_alert1 "EAST-1:28,CENTER+5:27"
+#define ui_alert2 "EAST-1:28,CENTER+4:25"
+#define ui_alert3 "EAST-1:28,CENTER+3:23"
+#define ui_alert4 "EAST-1:28,CENTER+2:21"
+#define ui_alert5 "EAST-1:28,CENTER+1:19"
+
 
 //Gun buttons
 #define ui_gun1 "EAST-2:26,SOUTH+2:7"
@@ -131,3 +141,18 @@
 #define ui_ai_take_picture "SOUTH:6,WEST+12"
 #define ui_ai_view_images "SOUTH:6,WEST+13"
 #define ui_ai_sensor "SOUTH:6,WEST+14"
+
+// Bots
+#define ui_bot_radio "EAST-1:28,SOUTH:7"
+#define ui_bot_pull "EAST-2:26,SOUTH:7"
+
+//HUD styles. Please ensure HUD_VERSIONS is the same as the maximum index. Index order defines how they are cycled in F12.
+#define HUD_STYLE_STANDARD 1
+#define HUD_STYLE_REDUCED 2
+#define HUD_STYLE_NOHUD 3
+
+
+#define HUD_VERSIONS 3	//used in show_hud()
+//1 = standard hud
+//2 = reduced hud (just hands and intent switcher)
+//3 = no hud (for screenshots)

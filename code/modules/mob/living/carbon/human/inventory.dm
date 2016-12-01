@@ -2,46 +2,15 @@
 	set name = "quick-equip"
 	set hidden = 1
 
-	if(ishuman(src))
-		var/mob/living/carbon/human/H = src
-		var/obj/item/I = H.get_active_hand()
-		var/obj/item/weapon/storage/S = H.get_inactive_hand()
-		if(!I)
-			H << "<span class='notice'>You are not holding anything to equip.</span>"
-			return
-
-		if(istype(I, /obj/item/clothing/head/helmet/space/rig)) // If the item to be equipped is a rigid suit helmet
-			var/obj/item/clothing/head/helmet/space/rig/C = I
-			if(C.rig_restrict_helmet)
-				src << "\red You must fasten the helmet to a hardsuit first. (Target the head and use on a hardsuit)" // Stop eva helms equipping.
-				return 0
-
-		if(H.equip_to_appropriate_slot(I))
-			if(hand)
-				update_inv_l_hand(0)
-			else
-				update_inv_r_hand(0)
-		else if(s_active && s_active.can_be_inserted(I,1))  //if storage active insert there
-			s_active.handle_item_insertion(I)
-		else if(istype(S, /obj/item/weapon/storage) && S.can_be_inserted(I,1))  //see if we have box in other hand
-			S.handle_item_insertion(I)
-		else
-			S = H.get_item_by_slot(slot_belt)
-			if(istype(S, /obj/item/weapon/storage) && S.can_be_inserted(I,1))    //else we put in belt
-				S.handle_item_insertion(I)
-			else
-				S = H.get_item_by_slot(slot_back)  //else we put in backpack
-				if(istype(S, /obj/item/weapon/storage) && S.can_be_inserted(I,1))
-					S.handle_item_insertion(I)
-				else
-					H << "\red You are unable to equip that."
-
+	var/obj/item/I = get_active_hand()
+	if(I)
+		I.equip_to_best_slot(src)
 
 /mob/living/carbon/human/proc/equip_in_one_of_slots(obj/item/W, list/slots, del_on_fail = 1)
-	for (var/slot in slots)
-		if (equip_to_slot_if_possible(W, slots[slot], del_on_fail = 0))
+	for(var/slot in slots)
+		if(equip_to_slot_if_possible(W, slots[slot], del_on_fail = 0))
 			return slot
-	if (del_on_fail)
+	if(del_on_fail)
 		qdel(W)
 	return null
 
@@ -106,13 +75,17 @@
 		if(slot_tie)
 			return 1
 
+// The actual dropping happens at the mob level - checks to prevent drops should
+// come here
+/mob/living/carbon/human/canUnEquip(obj/item/I, force)
+	. = ..()
+	var/obj/item/organ/O = I
+	if(istype(O) && O.owner == src)
+		. = 0 // keep a good grip on your heart
+
 /mob/living/carbon/human/unEquip(obj/item/I)
 	. = ..() //See mob.dm for an explanation on this and some rage about people copypasting instead of calling ..() like they should.
 	if(!. || !I)
-		return
-
-	var/obj/item/organ/internal/O = I //Organs shouldn't be removed unless you call droplimb.
-	if(istype(O) && O.owner == src)
 		return
 
 	if(I == wear_suit)
@@ -144,11 +117,12 @@
 		if(I.flags & BLOCKHAIR || I.flags & BLOCKHEADHAIR)
 			update_hair()	//rebuild hair
 			update_fhair()
+			update_head_accessory()
 		update_inv_head()
 	else if(I == r_ear)
 		r_ear = null
 		update_inv_ears()
-	else if (I == l_ear)
+	else if(I == l_ear)
 		l_ear = null
 		update_inv_ears()
 	else if(I == shoes)
@@ -162,10 +136,10 @@
 		if(I.flags & BLOCKHAIR || I.flags & BLOCKHEADHAIR)
 			update_hair()	//rebuild hair
 			update_fhair()
+			update_head_accessory()
 		if(internal)
-			if(internals)
-				internals.icon_state = "internal0"
 			internal = null
+			update_internals_hud_icon(0)
 		sec_hud_set_ID()
 		update_inv_wear_mask()
 	else if(I == wear_id)
@@ -215,6 +189,7 @@
 	W.loc = src
 	W.equipped(src, slot)
 	W.layer = 20
+	W.plane = HUD_PLANE
 
 	switch(slot)
 		if(slot_back)
@@ -224,7 +199,10 @@
 			wear_mask = W
 			if((wear_mask.flags & BLOCKHAIR) || (wear_mask.flags & BLOCKHEADHAIR))
 				update_hair(redraw_mob)	//rebuild hair
-			sec_hud_set_ID()
+				update_fhair(redraw_mob)
+				update_head_accessory(redraw_mob)
+			if(hud_list.len)
+				sec_hud_set_ID()
 			update_inv_wear_mask(redraw_mob)
 		if(slot_handcuffed)
 			handcuffed = W
@@ -243,7 +221,8 @@
 			update_inv_belt(redraw_mob)
 		if(slot_wear_id)
 			wear_id = W
-			sec_hud_set_ID()
+			if(hud_list.len)
+				sec_hud_set_ID()
 			update_inv_wear_id(redraw_mob)
 		if(slot_wear_pda)
 			wear_pda = W
@@ -255,6 +234,7 @@
 				O.loc = src
 				r_ear = O
 				O.layer = 20
+				O.plane = HUD_PLANE
 			update_inv_ears(redraw_mob)
 		if(slot_r_ear)
 			r_ear = W
@@ -263,6 +243,7 @@
 				O.loc = src
 				l_ear = O
 				O.layer = 20
+				O.plane = HUD_PLANE
 			update_inv_ears(redraw_mob)
 		if(slot_glasses)
 			glasses = W
@@ -274,6 +255,8 @@
 			head = W
 			if((head.flags & BLOCKHAIR) || (head.flags & BLOCKHEADHAIR))
 				update_hair(redraw_mob)	//rebuild hair
+				update_fhair(redraw_mob)
+				update_head_accessory(redraw_mob)
 			update_inv_head(redraw_mob)
 		if(slot_shoes)
 			shoes = W
@@ -301,7 +284,7 @@
 			var/obj/item/clothing/under/uniform = src.w_uniform
 			uniform.attackby(W,src)
 		else
-			src << "<span class='warning'>You are trying to equip this item to an unsupported inventory slot. Report this to a coder!</span>"
+			to_chat(src, "<span class='warning'>You are trying to equip this item to an unsupported inventory slot. Report this to a coder!</span>")
 			return
 
 /mob/living/carbon/human/put_in_hands(obj/item/W)
@@ -413,9 +396,9 @@
 	if(istype(I, /obj/item/clothing/under) || istype(I, /obj/item/clothing/suit))
 		if(FAT in mutations)
 			//testing("[M] TOO FAT TO WEAR [src]!")
-			if(!(I.flags & ONESIZEFITSALL))
+			if(!(I.flags_size & ONESIZEFITSALL))
 				if(!disable_warning)
-					src << "<span class='alert'>You're too fat to wear the [I].</span>"
+					to_chat(src, "<span class='alert'>You're too fat to wear the [I].</span>")
 				return 0
 
 	switch(slot)
@@ -462,7 +445,7 @@
 				return 0
 			if(!w_uniform)
 				if(!disable_warning)
-					src << "<span class='alert'>You need a jumpsuit before you can attach this [name].</span>"
+					to_chat(src, "<span class='alert'>You need a jumpsuit before you can attach this [name].</span>")
 				return 0
 			if(!(I.slot_flags & SLOT_BELT))
 				return
@@ -506,7 +489,7 @@
 				return 0
 			if(!w_uniform)
 				if(!disable_warning)
-					src << "<span class='alert'>You need a jumpsuit before you can attach this [name].</span>"
+					to_chat(src, "<span class='alert'>You need a jumpsuit before you can attach this [name].</span>")
 				return 0
 			if(!(I.slot_flags & SLOT_ID))
 				return 0
@@ -516,7 +499,7 @@
 				return 0
 			if(!w_uniform)
 				if(!disable_warning)
-					src << "<span class='alert'>You need a jumpsuit before you can attach this [name].</span>"
+					to_chat(src, "<span class='alert'>You need a jumpsuit before you can attach this [name].</span>")
 				return 0
 			if(!(I.slot_flags & SLOT_PDA))
 				return 0
@@ -528,7 +511,7 @@
 				return 0
 			if(!w_uniform)
 				if(!disable_warning)
-					src << "<span class='alert'>You need a jumpsuit before you can attach this [name].</span>"
+					to_chat(src, "<span class='alert'>You need a jumpsuit before you can attach this [name].</span>")
 				return 0
 			if(I.slot_flags & SLOT_DENYPOCKET)
 				return
@@ -541,7 +524,7 @@
 				return 0
 			if(!w_uniform)
 				if(!disable_warning)
-					src << "<span class='alert'>You need a jumpsuit before you can attach this [name].</span>"
+					to_chat(src, "<span class='alert'>You need a jumpsuit before you can attach this [name].</span>")
 				return 0
 			if(I.slot_flags & SLOT_DENYPOCKET)
 				return 0
@@ -555,15 +538,15 @@
 				return 0
 			if(!wear_suit)
 				if(!disable_warning)
-					src << "<span class='alert'>You need a suit before you can attach this [name].</span>"
+					to_chat(src, "<span class='alert'>You need a suit before you can attach this [name].</span>")
 				return 0
 			if(!wear_suit.allowed)
 				if(!disable_warning)
-					src << "You somehow have a suit with no defined allowed items for suit storage, stop that."
+					to_chat(src, "You somehow have a suit with no defined allowed items for suit storage, stop that.")
 				return 0
 			if(I.w_class > 4)
 				if(!disable_warning)
-					src << "The [name] is too big to attach."
+					to_chat(src, "The [name] is too big to attach.")
 				return 0
 			if(istype(I, /obj/item/device/pda) || istype(I, /obj/item/weapon/pen) || is_type_in_list(I, wear_suit.allowed))
 				return 1
@@ -589,12 +572,12 @@
 		if(slot_tie)
 			if(!w_uniform)
 				if(!disable_warning)
-					src << "<span class='warning'>You need a jumpsuit before you can attach this [name].</span>"
+					to_chat(src, "<span class='warning'>You need a jumpsuit before you can attach this [name].</span>")
 				return 0
 			var/obj/item/clothing/under/uniform = w_uniform
 			if(uniform.accessories.len && !uniform.can_attach_accessory(src))
 				if(!disable_warning)
-					src << "<span class='warning'>You already have an accessory of this type attached to your [uniform].</span>"
+					to_chat(src, "<span class='warning'>You already have an accessory of this type attached to your [uniform].</span>")
 				return 0
 			if(!(I.slot_flags & SLOT_TIE))
 				return 0

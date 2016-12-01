@@ -24,7 +24,7 @@
 		M.verbs -= P
 		//M.verbs -= alien_powers.Copy()
 
-	..()
+	. = ..()
 
 /obj/item/organ/internal/xenos/prepare_eat()
 	var/obj/S = ..()
@@ -106,7 +106,7 @@
 		A.updatePlasmaDisplay()
 
 /obj/item/organ/internal/alien/plasmavessel/remove(mob/living/carbon/M, special = 0)
-	..()
+	. =..()
 	if(isalien(M))
 		var/mob/living/carbon/alien/A = M
 		A.updatePlasmaDisplay()
@@ -114,6 +114,7 @@
 
 /obj/item/organ/internal/xenos/acidgland
 	name = "xeno acid gland"
+	icon_state = "acid"
 	parent_organ = "head"
 	slot = "acid"
 	origin_tech = "biotech=5;materials=2;combat=2"
@@ -122,6 +123,7 @@
 
 /obj/item/organ/internal/xenos/hivenode
 	name = "xeno hive node"
+	icon_state = "hivenode"
 	parent_organ = "head"
 	slot = "hivenode"
 	origin_tech = "biotech=5;magnets=4;bluespace=3"
@@ -131,10 +133,14 @@
 /obj/item/organ/internal/xenos/hivenode/insert(mob/living/carbon/M, special = 0)
 	..()
 	M.faction |= "alien"
+	M.add_language("Hivemind")
+	M.add_language("Xenomorph")
 
 /obj/item/organ/internal/xenos/hivenode/remove(mob/living/carbon/M, special = 0)
 	M.faction -= "alien"
-	..()
+	M.remove_language("Hivemind")
+	M.remove_language("Xenomorph")
+	. = ..()
 
 /obj/item/organ/internal/xenos/neurotoxin
 	name = "xeno neurotoxin gland"
@@ -148,7 +154,7 @@
 	name = "xeno resin organ"//...there tiger....
 	parent_organ = "mouth"
 	icon_state = "liver-x"
-	slot = "hivenode"
+	slot = "spinner"
 	origin_tech = "biotech=5;materials=4"
 	alien_powers = list(/mob/living/carbon/alien/humanoid/proc/resin)
 

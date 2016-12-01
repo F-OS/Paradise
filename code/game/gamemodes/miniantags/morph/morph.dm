@@ -17,14 +17,7 @@
 	pass_flags = PASSTABLE
 	ventcrawler = 2
 
-	min_oxy = 0
-	max_oxy = 0
-	min_tox = 0
-	max_tox = 0
-	min_co2 = 0
-	max_co2 = 0
-	min_n2 = 0
-	max_n2 = 0
+	atmos_requirements = list("min_oxy" = 0, "max_oxy" = 0, "min_tox" = 0, "max_tox" = 0, "min_co2" = 0, "max_co2" = 0, "min_n2" = 0, "max_n2" = 0)
 
 	minbodytemp = 0
 	maxHealth = 150
@@ -38,7 +31,7 @@
 	wander = 0
 	attacktext = "glomps"
 	attack_sound = 'sound/effects/blobattack.ogg'
-	meat_type = /obj/item/weapon/reagent_containers/food/snacks/meat/slab
+	butcher_results = list(/obj/item/weapon/reagent_containers/food/snacks/meat/slab = 2)
 
 	var/morphed = 0
 	var/atom/movable/form = null
@@ -59,7 +52,7 @@
 		else
 			..()
 		if(get_dist(user,src)<=3)
-			user << "<span class='warning'>It doesn't look quite right...</span>"
+			to_chat(user, "<span class='warning'>It doesn't look quite right...</span>")
 	else
 		..()
 	return
@@ -88,7 +81,7 @@
 		if(istype(A) && allowed(A))
 			assume(A)
 	else
-		src << "<span class='warning'>Your chameleon skin is still repairing itself!</span>"
+		to_chat(src, "<span class='warning'>Your chameleon skin is still repairing itself!</span>")
 		..()
 
 /mob/living/simple_animal/hostile/morph/proc/assume(atom/movable/target)
@@ -131,9 +124,6 @@
 
 	morph_time = world.time + MORPH_COOLDOWN
 
-/mob/living/simple_animal/hostile/morph/handle_state_icons()
-	return
-
 /mob/living/simple_animal/hostile/morph/death(gibbed)
 	if(morphed)
 		visible_message("<span class='warning'>[src] twists and dissolves into a pile of green flesh!</span>", \
@@ -169,7 +159,7 @@
 		if(L.stat == DEAD)
 			if(do_after(src, 30, target = L))
 				if(eat(L))
-					heal_overall_damage(50,50)
+					adjustHealth(-50)
 			return
 	else if(istype(target,/obj/item)) // Eat items just to be annoying
 		var/obj/item/I = target
@@ -179,5 +169,3 @@
 			return
 	target.attack_animal(src)
 
-/mob/living/simple_animal/hostile/morph/update_action_buttons() //So all eaten objects are not counted every life
-	return

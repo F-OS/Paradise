@@ -8,6 +8,7 @@ var/global/datum/controller/process/timer/timer_master
 	name = "timer"
 	schedule_interval = 5 //every 0.5 seconds
 	timer_master = src
+	log_startup_progress("Timer process starting up.")
 
 /datum/controller/process/timer/statProcess()
 	..()
@@ -28,7 +29,8 @@ var/global/datum/controller/process/timer/timer_master
 
 /datum/controller/process/timer/proc/runevent(datum/timedevent/event)
 	set waitfor = 0
-	call(event.thingToCall, event.procToCall)(arglist(event.argList))
+	if(event.thingToCall)
+		call(event.thingToCall, event.procToCall)(arglist(event.argList))
 
 /datum/timedevent
 	var/thingToCall
@@ -60,7 +62,10 @@ var/global/datum/controller/process/timer/timer_master
 	event.thingToCall = thingToCall
 	event.procToCall = procToCall
 	event.timeToRun = world.time + wait
-	event.hash = list2text(args)
+	var/hashlist = args.Copy()
+
+	hashlist[1] = "[thingToCall](\ref[thingToCall])"
+	event.hash = jointext(hashlist, null)
 	if(args.len > 4)
 		event.argList = args.Copy(5)
 
@@ -74,6 +79,11 @@ var/global/datum/controller/process/timer/timer_master
 	return event.id
 
 /proc/deltimer(id)
+	if(id == 0)
+		// No event will correspond to an id of 0 - the timer does not exist
+		// Save us a possibly expensive iteration through the timer list
+		// This would probably be more efficient in general if we used an associative list instead
+		return 0
 	for(var/datum/timedevent/event in timer_master.processing_timers)
 		if(event.id == id)
 			qdel(event)

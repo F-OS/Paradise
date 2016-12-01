@@ -6,7 +6,7 @@
 	item_state = ""	//no inhands
 	item_color = "bluetie"
 	slot_flags = SLOT_TIE
-	w_class = 2.0
+	w_class = 2
 	var/slot = "decor"
 	var/obj/item/clothing/under/has_suit = null		//the suit the tie may be attached to
 	var/image/inv_overlay = null	//overlay used when attached to clothing.
@@ -22,14 +22,36 @@
 	has_suit = S
 	loc = has_suit
 	has_suit.overlays += inv_overlay
+	has_suit.actions += actions
 
-	user << "<span class='notice'>You attach [src] to [has_suit].</span>"
+	for(var/X in actions)
+		var/datum/action/A = X
+		if(has_suit.is_equipped())
+			var/mob/M = has_suit.loc
+			A.Grant(M)
+
+	for(var/armor_type in armor)
+		has_suit.armor[armor_type] += armor[armor_type]
+
+	if(user)
+		to_chat(user, "<span class='notice'>You attach [src] to [has_suit].</span>")
 	src.add_fingerprint(user)
 
 /obj/item/clothing/accessory/proc/on_removed(mob/user as mob)
 	if(!has_suit)
 		return
 	has_suit.overlays -= inv_overlay
+	has_suit.actions -= actions
+
+	for(var/X in actions)
+		var/datum/action/A = X
+		if(ismob(has_suit.loc))
+			var/mob/M = has_suit.loc
+			A.Remove(M)
+
+	for(var/armor_type in armor)
+		has_suit.armor[armor_type] -= armor[armor_type]
+
 	has_suit = null
 	usr.put_in_hands(src)
 	src.add_fingerprint(user)
@@ -38,7 +60,7 @@
 	// This code lets you put accessories on other people by attacking their sprite with the accessory
 	if(istype(H))
 		if(H.wear_suit && H.wear_suit.flags_inv & HIDEJUMPSUIT)
-			user << "[H]'s body is covered, and you cannot attach \the [src]."
+			to_chat(user, "[H]'s body is covered, and you cannot attach \the [src].")
 			return 1
 		var/obj/item/clothing/under/U = H.w_uniform
 		if(istype(U))
@@ -47,7 +69,7 @@
 				user.visible_message("<span class='notice'>[user] puts a [src.name] on [H]'s [U.name]!</span>", "<span class='notice'>You finish putting a [src.name] on [H]'s [U.name].</span>")
 				U.attackby(src, user)
 		else
-			user << "[H] is not wearing anything to attach \the [src] to."
+			to_chat(user, "[H] is not wearing anything to attach \the [src] to.")
 		return 1
 	return ..()
 
@@ -88,6 +110,10 @@
 	icon_state = "waistcoat"
 	item_state = "waistcoat"
 	item_color = "waistcoat"
+	species_fit = list("Vox")
+	sprite_sheets = list(
+		"Vox" = 'icons/mob/species/vox/suit.dmi'
+		)
 
 /obj/item/clothing/accessory/stethoscope
 	name = "stethoscope"
@@ -97,35 +123,45 @@
 
 /obj/item/clothing/accessory/stethoscope/attack(mob/living/carbon/human/M, mob/living/user)
 	if(ishuman(M) && isliving(user))
-		if(user.a_intent == I_HELP)
-			var/body_part = parse_zone(user.zone_sel.selecting)
-			if(body_part)
-				var/their = "their"
-				switch(M.gender)
-					if(MALE)	their = "his"
-					if(FEMALE)	their = "her"
-
-				var/sound = "pulse"
-				var/sound_strength
-
-				if(M.stat == DEAD || (M.status_flags&FAKEDEATH))
-					sound_strength = "cannot hear"
-					sound = "anything"
-				else
-					sound_strength = "hear a weak"
-					switch(body_part)
-						if("chest")
-							if(M.oxyloss < 50)
-								sound_strength = "hear a healthy"
-							sound = "pulse and respiration"
-						if("eyes","mouth")
-							sound_strength = "cannot hear"
-							sound = "anything"
-						else
-							sound_strength = "hear a weak"
-
-				user.visible_message("[user] places [src] against [M]'s [body_part] and listens attentively.", "You place [src] against [their] [body_part]. You [sound_strength] [sound].")
-				return
+		if(user == M)
+			user.visible_message("[user] places \the [src] against \his chest and listens attentively.", "You place \the [src] against your chest...")
+		else
+			user.visible_message("[user] places \the [src] against [M]'s chest and listens attentively.", "You place \the [src] against [M]'s chest...")
+		var/obj/item/organ/internal/H = M.get_int_organ(/obj/item/organ/internal/heart)
+		var/obj/item/organ/internal/L = M.get_int_organ(/obj/item/organ/internal/lungs)
+		if((H && M.pulse) || (L && !(NO_BREATH in M.mutations) && !(M.species.flags & NO_BREATH)))
+			var/color = "notice"
+			if(H)
+				var/heart_sound
+				switch(H.damage)
+					if(0 to 1)
+						heart_sound = "healthy"
+					if(1 to 25)
+						heart_sound = "offbeat"
+					if(25 to 50)
+						heart_sound = "uneven"
+						color = "warning"
+					if(50 to INFINITY)
+						heart_sound = "weak, unhealthy"
+						color = "warning"
+				to_chat(user, "<span class='[color]'>You hear \an [heart_sound] pulse.</span>")
+			if(L)
+				var/lung_sound
+				switch(L.damage)
+					if(0 to 1)
+						lung_sound = "healthy respiration"
+					if(1 to 25)
+						lung_sound = "labored respiration"
+					if(25 to 50)
+						lung_sound = "pained respiration"
+						color = "warning"
+					if(50 to INFINITY)
+						lung_sound = "gurgling"
+						color = "warning"
+				to_chat(user, "<span class='[color]'>You hear [lung_sound].</span>")
+		else
+			to_chat(user, "<span class='warning'>You don't hear anything.</span>")
+		return
 	return ..(M,user)
 
 
@@ -136,6 +172,7 @@
 	icon_state = "bronze"
 	item_color = "bronze"
 	materials = list(MAT_METAL=1000)
+	burn_state = FIRE_PROOF
 
 /obj/item/clothing/accessory/medal/conduct
 	name = "distinguished conduct medal"
@@ -203,7 +240,7 @@
 
 /obj/item/clothing/accessory/holobadge/attack_self(mob/user as mob)
 	if(!stored_name)
-		user << "Waving around a badge before swiping an ID would be pretty pointless."
+		to_chat(user, "Waving around a badge before swiping an ID would be pretty pointless.")
 		return
 	if(isliving(user))
 		user.visible_message("\red [user] displays their NanoTrasen Internal Security Legal Authorization Badge.\nIt reads: [stored_name], NT Security.","\red You display your NanoTrasen Internal Security Legal Authorization Badge.\nIt reads: [stored_name], NT Security.")
@@ -220,22 +257,22 @@
 			id_card = pda.id
 
 		if(access_security in id_card.access || emagged)
-			user << "You imprint your ID details onto the badge."
+			to_chat(user, "You imprint your ID details onto the badge.")
 			stored_name = id_card.registered_name
 			name = "holobadge ([stored_name])"
 			desc = "This glowing blue badge marks [stored_name] as THE LAW."
 		else
-			user << "[src] rejects your insufficient access rights."
+			to_chat(user, "[src] rejects your insufficient access rights.")
 		return
 	..()
 
 /obj/item/clothing/accessory/holobadge/emag_act(user as mob)
-	if (emagged)
-		user << "\red [src] is already cracked."
+	if(emagged)
+		to_chat(user, "\red [src] is already cracked.")
 		return
 	else
 		emagged = 1
-		user << "\red You swipe the card and crack the holobadge security checks."
+		to_chat(user, "\red You swipe the card and crack the holobadge security checks.")
 		return
 
 /obj/item/clothing/accessory/holobadge/attack(mob/living/carbon/human/M, mob/living/user)
@@ -339,28 +376,94 @@
 
 /obj/item/clothing/accessory/petcollar
 	name = "pet collar"
+	desc = "The latest fashion accessory for your favorite pets!"
 	icon_state = "petcollar"
 	item_color = "petcollar"
 	var/tagname = null
+	var/obj/item/weapon/card/id/access_id
+
+/obj/item/clothing/accessory/petcollar/Destroy()
+	if(access_id)
+		qdel(access_id)
+		access_id = null
+	processing_objects -= src
+	return ..()
 
 /obj/item/clothing/accessory/petcollar/attack_self(mob/user as mob)
-	tagname = copytext(sanitize(input(user, "Would you like to change the name on the tag?", "Name your new pet", "Spot") as null|text),1,MAX_NAME_LEN)
-	name = "[initial(name)] - [tagname]"
+	var/option = "Change Name"
+	if(access_id)
+		option = input(user, "What do you want to do?", "[src]", option) as null|anything in list("Change Name", "Remove ID")
+
+	switch(option)
+		if("Change Name")
+			var/t = input(user, "Would you like to change the name on the tag?", "Name your new pet", tagname ? tagname : "Spot") as null|text
+			if(t)
+				tagname = copytext(sanitize(t), 1, MAX_NAME_LEN)
+				name = "[initial(name)] - [tagname]"
+		if("Remove ID")
+			if(access_id)
+				user.visible_message("<span class='warning'>[user] starts unclipping \the [access_id] from \the [src].</span>")
+				if(do_after(user, 50, target = user) && access_id)
+					user.visible_message("<span class='warning'>[user] unclips \the [access_id] from \the [src].</span>")
+					access_id.forceMove(get_turf(user))
+					user.put_in_hands(access_id)
+					access_id = null
+
+/obj/item/clothing/accessory/petcollar/attackby(obj/item/weapon/card/id/W, mob/user, params)
+	if(!istype(W))
+		return ..()
+	if(access_id)
+		to_chat(user, "<span class='warning'>There is already \a [access_id] clipped onto \the [src]</span>")
+	user.drop_item()
+	W.forceMove(src)
+	access_id = W
+	to_chat(user, "<span class='notice'>\The [W] clips onto \the [src] snugly.</span>")
+
+/obj/item/clothing/accessory/petcollar/GetAccess()
+	return access_id ? access_id.GetAccess() : ..()
+
+/obj/item/clothing/accessory/petcollar/examine(mob/user)
+	..()
+	if(access_id)
+		to_chat(user, "There is [bicon(access_id)] \a [access_id] clipped onto it.")
+
+/obj/item/clothing/accessory/petcollar/equipped(mob/living/simple_animal/user)
+	if(istype(user))
+		processing_objects |= src
+
+/obj/item/clothing/accessory/petcollar/dropped(mob/living/simple_animal/user)
+	processing_objects -= src
+
+/obj/item/clothing/accessory/petcollar/process()
+	var/mob/living/simple_animal/M = loc
+	// if it wasn't intentionally unequipped but isn't being worn, possibly gibbed
+	if(istype(M) && src == M.collar && M.stat != DEAD)
+		return
+
+	var/area/t = get_area(M)
+	var/obj/item/device/radio/headset/a = new /obj/item/device/radio/headset(null)
+	if(istype(t, /area/syndicate_station) || istype(t, /area/syndicate_mothership) || istype(t, /area/shuttle/syndicate_elite) )
+		//give the syndicats a bit of stealth
+		a.autosay("[M] has been vandalized in Space!", "[M]'s Death Alarm")
+	else
+		a.autosay("[M] has been vandalized in [t.name]!", "[M]'s Death Alarm")
+	qdel(a)
+	processing_objects -= src
 
 /proc/english_accessory_list(obj/item/clothing/under/U)
 	if(!istype(U) || !U.accessories.len)
 		return
 	var/list/A = U.accessories
 	var/total = A.len
-	if (total == 1)
+	if(total == 1)
 		return "\a [A[1]]"
-	else if (total == 2)
+	else if(total == 2)
 		return "\a [A[1]] and \a [A[2]]"
 	else
 		var/output = ""
 		var/index = 1
 		var/comma_text = ", "
-		while (index < total)
+		while(index < total)
 			output += "\a [A[index]][comma_text]"
 			index++
 

@@ -23,16 +23,13 @@
 		H.equip_or_collect(new /obj/item/clothing/under/rank/chaplain(H), slot_w_uniform)
 		H.equip_or_collect(new /obj/item/device/pda/chaplain(H), slot_wear_pda)
 		H.equip_or_collect(new /obj/item/clothing/shoes/black(H), slot_shoes)
-		if(H.backbag == 1)
-			H.equip_or_collect(new /obj/item/weapon/storage/box/survival(H), slot_r_hand)
-		else
-			H.equip_or_collect(new /obj/item/weapon/storage/box/survival(H.back), slot_in_backpack)
-			H.equip_or_collect(new /obj/item/device/camera/spooky(H.back), slot_in_backpack)
+		H.equip_or_collect(new /obj/item/weapon/storage/box/survival(H), slot_in_backpack)
+		H.equip_or_collect(new /obj/item/device/camera/spooky(H), slot_in_backpack)
 		spawn(0)
 			var/religion_name = "Christianity"
 			var/new_religion = sanitize(copytext(input(H, "You are the crew services officer. Would you like to change your religion? Default is Christianity, in SPACE.", "Name change", religion_name),1,MAX_NAME_LEN))
 
-			if (!new_religion)
+			if(!new_religion)
 				new_religion = religion_name
 
 			switch(lowertext(new_religion))
@@ -67,7 +64,7 @@
 			var/deity_name = "Space Jesus"
 			var/new_deity = sanitize(copytext(input(H, "Would you like to change your deity? Default is Space Jesus.", "Name change", deity_name),1,MAX_NAME_LEN))
 
-			if ((length(new_deity) == 0) || (new_deity == "Space Jesus") )
+			if((length(new_deity) == 0) || (new_deity == "Space Jesus") )
 				new_deity = deity_name
 			B.deity_name = new_deity
 
@@ -79,7 +76,7 @@
 
 			while(!accepted)
 				if(!B) break // prevents possible runtime errors
-				new_book_style = input(H,"Which bible style would you like?") in list("Bible", "Koran", "Scrapbook", "Creeper", "White Bible", "Holy Light", "Athiest", "Tome", "The King in Yellow", "Ithaqua", "Scientology", "the bible melts", "Necronomicon")
+				new_book_style = input(H,"Which bible style would you like?") in list("Bible", "Koran", "Scrapbook", "Creeper", "White Bible", "Holy Light", "Athiest", "Tome", "The King in Yellow", "Ithaqua", "Scientology", "the bible melts", "Necronomicon", "Greentext")
 				switch(new_book_style)
 					if("Koran")
 						B.icon_state = "koran"
@@ -129,6 +126,9 @@
 					if("Necronomicon")
 						B.icon_state = "necronomicon"
 						B.item_state = "necronomicon"
+					if("Greentext")
+						B.icon_state = "greentext"
+						B.item_state = "greentext"
 					else
 						// if christian bible, revert to default
 						B.icon_state = "bible"
@@ -145,7 +145,7 @@
 						accepted = 1
 					if("No")
 						if(outoftime)
-							H << "Welp, out of time, buddy. You're stuck. Next time choose faster."
+							to_chat(H, "Welp, out of time, buddy. You're stuck. Next time choose faster.")
 							accepted = 1
 
 			if(ticker)

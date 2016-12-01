@@ -23,7 +23,14 @@
 	update_icon()
 	return
 
-/obj/item/weapon/melee/baton/CheckParts()
+/obj/item/weapon/melee/baton/Destroy()
+	if(bcell)
+		qdel(bcell)
+		bcell = null
+	return ..()
+
+/obj/item/weapon/melee/baton/CheckParts(list/parts_list)
+	..()
 	bcell = locate(/obj/item/weapon/stock_parts/cell) in contents
 	update_icon()
 
@@ -46,33 +53,33 @@
 
 /obj/item/weapon/melee/baton/update_icon()
 	if(status)
-		icon_state = "[initial(icon_state)]_active"
+		icon_state = "[initial(name)]_active"
 	else if(!bcell)
-		icon_state = "[initial(icon_state)]_nocell"
+		icon_state = "[initial(name)]_nocell"
 	else
-		icon_state = "[initial(icon_state)]"
+		icon_state = "[initial(name)]"
 
 /obj/item/weapon/melee/baton/examine(mob/user)
 	..(user)
 	if(bcell)
-		user <<"<span class='notice'>The baton is [round(bcell.percent())]% charged.</span>"
+		to_chat(user, "<span class='notice'>The baton is [round(bcell.percent())]% charged.</span>")
 	if(!bcell)
-		user <<"<span class='warning'>The baton does not have a power source installed.</span>"
+		to_chat(user, "<span class='warning'>The baton does not have a power source installed.</span>")
 
 /obj/item/weapon/melee/baton/attackby(obj/item/weapon/W, mob/user, params)
 	if(istype(W, /obj/item/weapon/stock_parts/cell))
 		var/obj/item/weapon/stock_parts/cell/C = W
 		if(bcell)
-			user << "<span class='notice'>[src] already has a cell.</span>"
+			to_chat(user, "<span class='notice'>[src] already has a cell.</span>")
 		else
 			if(C.maxcharge < hitcost)
-				user << "<span class='notice'>[src] requires a higher capacity cell.</span>"
+				to_chat(user, "<span class='notice'>[src] requires a higher capacity cell.</span>")
 				return
 			if(!user.unEquip(W))
 				return
 			W.loc = src
 			bcell = W
-			user << "<span class='notice'>You install a cell in [src].</span>"
+			to_chat(user, "<span class='notice'>You install a cell in [src].</span>")
 			update_icon()
 
 	else if(istype(W, /obj/item/weapon/screwdriver))
@@ -80,7 +87,7 @@
 			bcell.updateicon()
 			bcell.loc = get_turf(src.loc)
 			bcell = null
-			user << "<span class='notice'>You remove the cell from the [src].</span>"
+			to_chat(user, "<span class='notice'>You remove the cell from the [src].</span>")
 			status = 0
 			update_icon()
 			return
@@ -90,14 +97,14 @@
 /obj/item/weapon/melee/baton/attack_self(mob/user)
 	if(bcell && bcell.charge > hitcost)
 		status = !status
-		user << "<span class='notice'>[src] is now [status ? "on" : "off"].</span>"
+		to_chat(user, "<span class='notice'>[src] is now [status ? "on" : "off"].</span>")
 		playsound(loc, "sparks", 75, 1, -1)
 	else
 		status = 0
 		if(!bcell)
-			user << "<span class='warning'>[src] does not have a power source!</span>"
+			to_chat(user, "<span class='warning'>[src] does not have a power source!</span>")
 		else
-			user << "<span class='warning'>[src] is out of charge.</span>"
+			to_chat(user, "<span class='warning'>[src] is out of charge.</span>")
 	update_icon()
 	add_fingerprint(user)
 
@@ -132,6 +139,11 @@
 
 
 /obj/item/weapon/melee/baton/proc/baton_stun(mob/living/L, mob/user)
+	if(ishuman(L))
+		var/mob/living/carbon/human/H = L
+		if(H.check_shields(0, "[user]'s [name]", src, MELEE_ATTACK)) //No message; check_shields() handles that
+			playsound(L, 'sound/weapons/Genhit.ogg', 50, 1)
+			return
 	user.lastattacked = L
 	L.lastattacker = user
 
@@ -154,7 +166,7 @@
 		var/mob/living/carbon/human/H = L
 		H.forcesay(hit_appends)
 
-	add_logs(L, user, "stunned", object="stunbaton")
+	add_logs(user, L, "stunned", object="stunbaton")
 
 /obj/item/weapon/melee/baton/emp_act(severity)
 	if(bcell)
@@ -182,13 +194,6 @@
 /obj/item/weapon/melee/baton/loaded/robot
 	hitcost = 1000
 
-
-/obj/item/weapon/melee/baton/loaded/ntcane
-	name = "fancy cane"
-	desc = "A cane with special engraving on it. It has a strange button on the handle..."
-	icon_state = "cane_nt"
-	item_state = "cane_nt"
-
 //Makeshift stun baton. Replacement for stun gloves.
 /obj/item/weapon/melee/baton/cattleprod
 	name = "stunprod"
@@ -200,11 +205,3 @@
 	stunforce = 5
 	hitcost = 3750
 	slot_flags = null
-
-/obj/item/weapon/melee/baton/cattleprod/update_icon()
-	if(status)
-		icon_state = "stunprod_active"
-	else if(!bcell)
-		icon_state = "stunprod_nocell"
-	else
-		icon_state = "stunprod"

@@ -6,15 +6,13 @@
 	icon_state = "aliend_s"
 
 /mob/living/carbon/alien/humanoid/drone/New()
-	var/datum/reagents/R = new/datum/reagents(100)
-	reagents = R
-	R.my_atom = src
+	create_reagents(100)
 	if(src.name == "alien drone")
 		src.name = text("alien drone ([rand(1, 1000)])")
 	src.real_name = src.name
-	internal_organs += new /obj/item/organ/internal/xenos/plasmavessel/drone
-	internal_organs += new /obj/item/organ/internal/xenos/acidgland
-	internal_organs += new /obj/item/organ/internal/xenos/resinspinner
+	alien_organs += new /obj/item/organ/internal/xenos/plasmavessel/drone
+	alien_organs += new /obj/item/organ/internal/xenos/acidgland
+	alien_organs += new /obj/item/organ/internal/xenos/resinspinner
 	..()
 
 //Drones use the same base as generic humanoids.
@@ -34,11 +32,11 @@
 			no_queen = 0
 
 		if(src.has_brain_worms())
-			src << "<span class='warning'>We cannot perform this ability at the present time!</span>"
+			to_chat(src, "<span class='warning'>We cannot perform this ability at the present time!</span>")
 			return
 		if(no_queen)
 			adjustPlasma(-500)
-			src << "<span class='noticealien'>You begin to evolve!</span>"
+			to_chat(src, "<span class='noticealien'>You begin to evolve!</span>")
 			for(var/mob/O in viewers(src, null))
 				O.show_message(text("<span class='alertalien'>[src] begins to twist and contort!</span>"), 1)
 			var/mob/living/carbon/alien/humanoid/queen/new_xeno = new(loc)
@@ -46,5 +44,5 @@
 			new_xeno.mind.name = new_xeno.name
 			qdel(src)
 		else
-			src << "<span class='notice'>We already have an alive queen.</span>"
+			to_chat(src, "<span class='notice'>We already have an alive queen.</span>")
 	return

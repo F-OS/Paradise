@@ -43,6 +43,16 @@
 	icon_state = "purplecrack"
 	duration = 6
 
+/obj/effect/overlay/temp/guardian
+	randomdir = 0
+
+/obj/effect/overlay/temp/guardian/phase
+	duration = 5
+	icon_state = "phasein"
+
+/obj/effect/overlay/temp/guardian/phase/out
+	icon_state = "phaseout"
+
 /obj/effect/overlay/temp/emp
 	name = "emp sparks"
 	icon = 'icons/effects/effects.dmi'
@@ -53,6 +63,13 @@
 	icon_state = "emp pulse"
 	duration = 8
 	randomdir = 0
+
+/obj/effect/overlay/temp/kinetic_blast
+	name = "kinetic explosion"
+	icon = 'icons/obj/projectiles.dmi'
+	icon_state = "kinetic_blast"
+	layer = 4.1
+	duration = 4
 
 /obj/effect/overlay/palmtree_r
 	name = "Palm tree"

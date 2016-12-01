@@ -2,7 +2,7 @@
 
 /obj/machinery/particle_accelerator/control_box
 	name = "Particle Accelerator Control Console"
-	desc = "This controls the density of the particles."
+	desc = "This part controls the density of the particles."
 	icon = 'icons/obj/machines/particle_accelerator.dmi'
 	icon_state = "control_box"
 	reference = "control_box"
@@ -86,7 +86,7 @@
 		return 1
 
 	if(!interface_control)
-		usr << "<span class='error'>ERROR: Request timed out. Check wire contacts.</span>"
+		to_chat(usr, "<span class='error'>ERROR: Request timed out. Check wire contacts.</span>")
 		return
 
 	if( href_list["close"] )
@@ -221,7 +221,7 @@
 /obj/machinery/particle_accelerator/control_box/proc/toggle_power()
 	src.active = !src.active
 	investigate_log("turned [active?"<font color='red'>ON</font>":"<font color='green'>OFF</font>"] by [usr ? usr.key : "outside forces"]","singulo")
-	if (active)
+	if(active)
 		msg_admin_attack("PA Control Computer turned ON by [key_name(usr, usr.client)](<A HREF='?_src_=holder;adminmoreinfo=\ref[usr]'>?</A>) in ([x],[y],[z] - <A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[x];Y=[y];Z=[z]'>JMP</a>)",0,1)
 		log_game("PA Control Computer turned ON by [usr.ckey]([usr]) in ([x],[y],[z])")
 		use_log += text("\[[time_stamp()]\] <font color='red'>[usr.name] ([usr.ckey]) has turned on the PA Control Computer.</font>")
@@ -249,11 +249,11 @@
 	user.set_machine(src)
 
 	var/dat = ""
-	dat += "<A href='?src=\ref[src];close=1'>Close</A><BR><BR>"
+	dat += "<A href='?src=[UID()];close=1'>Close</A><BR><BR>"
 	dat += "<h3>Status</h3>"
 	if(!assembled)
 		dat += "Unable to detect all parts!<BR>"
-		dat += "<A href='?src=\ref[src];scan=1'>Run Scan</A><BR><BR>"
+		dat += "<A href='?src=[UID()];scan=1'>Run Scan</A><BR><BR>"
 	else
 		dat += "All parts in place.<BR><BR>"
 		dat += "Power:"
@@ -261,9 +261,9 @@
 			dat += "On<BR>"
 		else
 			dat += "Off <BR>"
-		dat += "<A href='?src=\ref[src];togglep=1'>Toggle Power</A><BR><BR>"
+		dat += "<A href='?src=[UID()];togglep=1'>Toggle Power</A><BR><BR>"
 		dat += "Particle Strength: [src.strength] "
-		dat += "<A href='?src=\ref[src];strengthdown=1'>--</A>|<A href='?src=\ref[src];strengthup=1'>++</A><BR><BR>"
+		dat += "<A href='?src=[UID()];strengthdown=1'>--</A>|<A href='?src=[UID()];strengthup=1'>++</A><BR><BR>"
 
 	//user << browse(dat, "window=pacontrol;size=420x500")
 	//onclose(user, "pacontrol")

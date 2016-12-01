@@ -16,7 +16,7 @@
 	name = "Machine Board (SMES)"
 	desc = "The circuit board for a SMES."
 	id = "smes"
-	req_tech = list("programming" = 4, "power" = 5, "engineering" = 4)
+	req_tech = list("programming" = 4, "powerstorage" = 5, "engineering" = 4)
 	build_type = IMPRINTER
 	materials = list(MAT_GLASS = 1000, "sacid" = 20)
 	build_path = /obj/item/weapon/circuitboard/smes
@@ -90,6 +90,16 @@
 	build_type = IMPRINTER
 	materials = list(MAT_GLASS = 1000, "sacid" = 20)
 	build_path = /obj/item/weapon/circuitboard/teleporter_station
+	category = list ("Teleportation Machinery")
+
+/datum/design/teleport_perma
+	name = "Machine Board (Permanent Teleporter)"
+	desc = "Allows for the construction of circuit boards used to build a Permanent Teleporter."
+	id = "tele_perma"
+	req_tech = list("programming" = 3, "bluespace" = 5, "materials" = 4, "engineering" = 5)
+	build_type = IMPRINTER
+	materials = list(MAT_GLASS = 1000, "sacid" = 20)
+	build_path = /obj/item/weapon/circuitboard/teleporter_perma
 	category = list ("Teleportation Machinery")
 
 /datum/design/bodyscanner
@@ -180,16 +190,6 @@
 	build_type = IMPRINTER
 	materials = list(MAT_GLASS = 1000, "sacid" = 20)
 	build_path = /obj/item/weapon/circuitboard/sleeper
-	category = list("Medical Machinery")
-
-/datum/design/sleep_console
-	name = "Machine Board (Sleeper Console)"
-	desc = "Allows for the construction of circuit boards used to build a Sleeper Console."
-	id = "sleeper_console"
-	req_tech = list("programming" = 3, "biotech" = 2, "materials" = 3, "engineering" = 3)
-	build_type = IMPRINTER
-	materials = list(MAT_GLASS = 1000, "sacid" = 20)
-	build_path = /obj/item/weapon/circuitboard/sleep_console
 	category = list("Medical Machinery")
 
 /datum/design/biogenerator
@@ -422,6 +422,16 @@
 	build_path = /obj/item/weapon/circuitboard/candy_maker
 	category = list("Misc. Machinery")
 
+/datum/design/deepfryer
+	name = "Machine Board (Deep Fryer)"
+	desc = "The circuit board for a Deep Fryer."
+	id = "deepfryer"
+	req_tech = list("programming" = 2)
+	build_type = IMPRINTER
+	materials = list(MAT_GLASS = 1000, "sacid" = 20)
+	build_path = /obj/item/weapon/circuitboard/deepfryer
+	category = list("Misc. Machinery")
+
 /datum/design/orion_trail
 	name = "Machine Board (Orion Trail Arcade Machine)"
 	desc = "Allows for the construction of circuit boards used to build a new Orion Trail machine."
@@ -440,16 +450,6 @@
 	build_type = IMPRINTER
 	materials = list(MAT_GLASS = 2000, "sacid" = 20)
 	build_path = /obj/item/weapon/circuitboard/programmable
-	category = list("Misc. Machinery")
-
-/datum/design/vendor
-	name = "Machine Board (Vendor)"
-	desc = "The circuit board for a Vendor."
-	id = "vendor"
-	req_tech = list("programming" = 1)
-	build_type = IMPRINTER
-	materials = list(MAT_GLASS = 1000, "sacid" = 20)
-	build_path = /obj/item/weapon/circuitboard/vendor
 	category = list("Misc. Machinery")
 
 /datum/design/pod
@@ -501,3 +501,34 @@
 	materials = list(MAT_GLASS=1000, "sacid"=20)
 	build_path = /obj/item/weapon/circuitboard/prize_counter
 	category = list("Misc. Machinery")
+
+/datum/design/gameboard
+	name = "Machine Design (Virtual Gameboard)"
+	desc = "The circuit board for a Virtual Gameboard."
+	id = "gameboard"
+	req_tech = list("programming" = 2)
+	build_type = IMPRINTER
+	materials = list(MAT_GLASS=1000, "sacid"=20)
+	build_path = /obj/item/weapon/circuitboard/gameboard
+	category = list("Misc. Machinery")
+
+
+/datum/design/botany_extractor
+	name = "Machine Design (Lysis-Isolation Centrifuge)"
+	desc = "The circuit board for a lysis-isolation centrifuge."
+	id = "botany_extractor"
+	req_tech = list("biotech" = 3, "programming" = 3)
+	build_type = IMPRINTER
+	materials = list(MAT_GLASS=1000, "sacid"=20)
+	build_path = /obj/item/weapon/circuitboard/botany_extractor
+	category = list("Hydroponics Machinery")
+
+/datum/design/botany_editor
+	name = "Machine Design (Bioballistic Delivery System)"
+	desc = "The circuit board for a bioballistic delivery system."
+	id = "botany_editor"
+	req_tech = list("biotech" = 3, "programming" = 3)
+	build_type = IMPRINTER
+	materials = list(MAT_GLASS=1000, "sacid"=20)
+	build_path = /obj/item/weapon/circuitboard/botany_editor
+	category = list("Hydroponics Machinery")

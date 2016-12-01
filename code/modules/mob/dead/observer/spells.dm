@@ -20,6 +20,7 @@ var/global/list/boo_phrases=list(
 	school = "transmutation"
 	charge_max = 600
 	clothes_req = 0
+	stat_allowed = 1
 	invocation = ""
 	invocation_type = "none"
 	range = 1 // Or maybe 3?
@@ -32,7 +33,7 @@ var/global/list/boo_phrases=list(
 			if(ishuman(A))
 				var/mob/living/carbon/human/H = A
 				if(H && H.client)
-					H << "<i>[pick(boo_phrases)]</i>"
+					to_chat(H, "<i>[pick(boo_phrases)]</i>")
 
 			// Flicker unblessed lights in range
 			if(istype(A,/obj/machinery/light))

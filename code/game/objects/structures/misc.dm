@@ -15,7 +15,7 @@
 		return attack_hand(user)
 
 	attack_hand(mob/user as mob)
-		user << "Civilians: NT is recruiting! Please head SOUTH to the NT Recruitment office to join the station's crew!"
+		to_chat(user, "Civilians: NT is recruiting! Please head SOUTH to the NT Recruitment office to join the station's crew!")
 
 /obj/structure/ninjatele
 
@@ -34,7 +34,7 @@
 	attack_hand(mob/user as mob)
 
 
-		if (user.mind.special_role=="Ninja")
+		if(user.mind.special_role=="Ninja")
 			switch(alert("Phase Jaunt relay primed, target locked as [station_name()], initiate VOID-shift translocation? (Warning! Internals required!)",,"Yes","No"))
 
 				if("Yes")
@@ -48,12 +48,12 @@
 					playsound(user.loc, 'sound/effects/sparks2.ogg', 50, 1)
 					anim(user.loc,user,'icons/mob/mob.dmi',,"phasein",,user.dir)
 
-					user <<"\blue <b>VOID-Shift</b> translocation successful"
+					to_chat(user, "<span class='boldnotice'>VOID-Shift</span> translocation successful")
 
 				if("No")
 
-					user <<"\red <b>Process aborted!</b>"
+					to_chat(user, "<span class='danger'>Process aborted!</span>")
 
 					return
 		else
-			user<< "\red <B>FÄ†AL ï¿½Rrï¿½R</B>: µ§er n¤t rec¤gnized, c-c¤ntr-r¤£§-£§ £¤cked."
+			to_chat(user, "<span class='danger'>FÄ†AL ï¿½Rrï¿½R</span>: Å§er nt recgnized, c-cntr-rä£§-Ã§ Ã¤cked.")

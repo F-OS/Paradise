@@ -18,7 +18,7 @@
  */
 /obj/item/weapon/kitchen/utensil
 	force = 5.0
-	w_class = 1.0
+	w_class = 1
 	throwforce = 0.0
 	throw_speed = 3
 	throw_range = 5
@@ -27,11 +27,10 @@
 	attack_verb = list("attacked", "stabbed", "poked")
 	hitsound = 'sound/weapons/bladeslice.ogg'
 	sharp = 0
-
-	var/loaded      //Descriptive string for currently loaded food object.
+	var/max_contents = 1
 
 /obj/item/weapon/kitchen/utensil/New()
-	if (prob(60))
+	if(prob(60))
 		src.pixel_y = rand(0, 4)
 
 	create_reagents(5)
@@ -49,25 +48,17 @@
 		else
 			return ..()
 
-	if (reagents.total_volume > 0)
-		// Mouthless people cannot eat
-		if(!M.can_eat())
-			user << "<span class=warning>[M] cannot eat with a fork!</span>"
-			return
+	if(contents.len)
+		var/obj/item/weapon/reagent_containers/food/snacks/toEat = contents[1]
+		if(istype(toEat))
+			if(M.eat(toEat, user))
+				toEat.On_Consume(M, user)
+				spawn(0)
+					if(toEat)
+						qdel(toEat)
+				overlays.Cut()
+				return
 
-		if(M == user)
-			M.visible_message("<span class='notice'>\The [user] eats some [loaded] from \the [src].</span>")
-			reagents.trans_to(M, reagents.total_volume)
-		else
-			M.visible_message("<span class='warning'>\The [user] attempts to feed some [loaded] to \the [M] with \the [src].</span>")
-			if(!do_mob(user, M)) return
-			M.visible_message("<span class='warning'>\The [user] feeds some [loaded] to \the [M] with \the [src].</span>")
-			reagents.trans_to(M, reagents.total_volume)
-			M.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has been utensil fed by [user.name] ([user.ckey]) with [src.name]</font>")
-			user.attack_log += text("\[[time_stamp()]\] <font color='red'>Utensil fed [M.name] ([M.ckey]) with [src.name]</font>")
-		playsound(M.loc,'sound/items/eatfood.ogg', rand(10,40), 1)
-		overlays.Cut()
-		return
 
 /obj/item/weapon/kitchen/utensil/fork
 	name = "fork"
@@ -173,7 +164,7 @@
 	throwforce = 10.0
 	throw_speed = 3
 	throw_range = 7
-	w_class = 3.0
+	w_class = 3
 	attack_verb = list("bashed", "battered", "bludgeoned", "thrashed", "whacked")
 
 /* Trays moved to /obj/item/weapon/storage/bag */
@@ -190,7 +181,7 @@
 	throwforce = 5
 	throw_speed = 3
 	throw_range = 3
-	w_class = 2.0
+	w_class = 2
 	attack_verb = list("bashed", "battered", "bludgeoned", "thrashed", "smashed")
 
 /obj/item/weapon/kitchen/mould/bear

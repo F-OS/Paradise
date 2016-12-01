@@ -1,6 +1,5 @@
 
 var/global/BSACooldown = 0
-var/global/floorIsLava = 0
 var/global/nologevent = 0
 
 ////////////////////////////////
@@ -8,8 +7,9 @@ var/global/nologevent = 0
 	msg = "<span class=\"admin\"><span class=\"prefix\">ADMIN LOG:</span> <span class=\"message\">[msg]</span></span>"
 	log_adminwarn(msg)
 	for(var/client/C in admins)
-		if(R_SERVER & C.holder.rights)
-			C << msg
+		if(R_ADMIN & C.holder.rights)
+			if(C.prefs && !(C.prefs.toggles & CHAT_NO_ADMINLOGS))
+				to_chat(C, msg)
 
 /proc/msg_admin_attack(var/text) //Toggleable Attack Messages
 	log_attack(text)
@@ -20,7 +20,7 @@ var/global/nologevent = 0
 				if(C.prefs.toggles & CHAT_ATTACKLOGS)
 					if(!istype(C, /mob/living))
 						var/msg = rendered
-						C << msg
+						to_chat(C, msg)
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////Panels
@@ -31,7 +31,7 @@ var/global/nologevent = 0
 	set desc="Edit player (respawn, ban, heal, etc)"
 
 	if(!M)
-		usr << "You seem to be selecting a mob that doesn't exist anymore."
+		to_chat(usr, "You seem to be selecting a mob that doesn't exist anymore.")
 		return
 
 	if(!check_rights(R_ADMIN|R_MOD))
@@ -49,18 +49,18 @@ var/global/nologevent = 0
 		body += " \[<A href='?_src_=holder;revive=\ref[M]'>Heal</A>\] "
 
 	body += "<br><br>\[ "
-	body += "<a href='?_src_=vars;Vars=\ref[M]'>VV</a> - "
+	body += "<a href='?_src_=vars;Vars=[M.UID()]'>VV</a> - "
 	body += "<a href='?_src_=holder;traitor=\ref[M]'>TP</a> - "
-	body += "<a href='?src=\ref[usr];priv_msg=\ref[M]'>PM</a> - "
+	body += "<a href='?src=[usr.UID()];priv_msg=\ref[M]'>PM</a> - "
 	body += "<a href='?_src_=holder;subtlemessage=\ref[M]'>SM</a> - "
-	body += "[admin_jump_link(M, src)]\] </b><br>"
+	body += "[admin_jump_link(M)]\] </b><br>"
 
 	body += "<b>Mob type:</b> [M.type]<br>"
 	if(M.client)
 		if(M.client.related_accounts_cid.len)
-			body += "<b>Related accounts by CID:</b> [list2text(M.client.related_accounts_cid, " - ")]<br>"
+			body += "<b>Related accounts by CID:</b> [jointext(M.client.related_accounts_cid, " - ")]<br>"
 		if(M.client.related_accounts_ip.len)
-			body += "<b>Related accounts by IP:</b> [list2text(M.client.related_accounts_ip, " - ")]<br><br>"
+			body += "<b>Related accounts by IP:</b> [jointext(M.client.related_accounts_ip, " - ")]<br><br>"
 
 	body += "<A href='?_src_=holder;boot2=\ref[M]'>Kick</A> | "
 	body += "<A href='?_src_=holder;warn=[M.ckey]'>Warn</A> | "
@@ -103,7 +103,7 @@ var/global/nologevent = 0
 		<A href='?_src_=holder;subtlemessage=\ref[M]'>Subtle message</A>
 	"}
 
-	if (M.client)
+	if(M.client)
 		if(!istype(M, /mob/new_player))
 			body += "<br><br>"
 			body += "<b>Transformation:</b>"
@@ -138,6 +138,14 @@ var/global/nologevent = 0
 				body += "<A href='?_src_=holder;makeanimal=\ref[M]'>Re-Animalize</A> | "
 			else
 				body += "<A href='?_src_=holder;makeanimal=\ref[M]'>Animalize</A> | "
+
+			if(istype(M, /mob/dead/observer))
+				body += "<a href='?_src_=holder;incarn_ghost=\ref[M]'>Re-incarnate</a> | "
+
+			if(ispAI(M))
+				body += "<B>Is a pAI</B> "
+			else
+				body += "<A href='?_src_=holder;makePAI=\ref[M]'>Make pAI</A> | "
 
 			// DNA2 - Admin Hax
 			if(M.dna && iscarbon(M))
@@ -183,7 +191,7 @@ var/global/nologevent = 0
 				<A href='?_src_=holder;simplemake=shade;mob=\ref[M]'>Shade</A>
 			"}
 
-	if (M.client)
+	if(M.client)
 		body += {"<br><br>
 			<b>Other actions:</b>
 			<br>
@@ -235,7 +243,7 @@ var/global/nologevent = 0
 	if(!check_rights(R_EVENT))
 		return
 
-	if (!istype(src,/datum/admins))
+	if(!istype(src,/datum/admins))
 		src = usr.client.holder
 
 	var/dat
@@ -248,12 +256,12 @@ var/global/nologevent = 0
 				<BR>Note that this panel allows full freedom over the news network, there are no constrictions except the few basic ones. Don't break things!</FONT>
 			"}
 			if(news_network.wanted_issue)
-				dat+= "<HR><A href='?src=\ref[src];ac_view_wanted=1'>Read Wanted Issue</A>"
+				dat+= "<HR><A href='?src=[UID()];ac_view_wanted=1'>Read Wanted Issue</A>"
 
-			dat+= {"<HR><BR><A href='?src=\ref[src];ac_create_channel=1'>Create Feed Channel</A>
-				<BR><A href='?src=\ref[src];ac_view=1'>View Feed Channels</A>
-				<BR><A href='?src=\ref[src];ac_create_feed_story=1'>Submit new Feed story</A>
-				<BR><BR><A href='?src=\ref[usr];mach_close=newscaster_main'>Exit</A>
+			dat+= {"<HR><BR><A href='?src=[UID()];ac_create_channel=1'>Create Feed Channel</A>
+				<BR><A href='?src=[UID()];ac_view=1'>View Feed Channels</A>
+				<BR><A href='?src=[UID()];ac_create_feed_story=1'>Submit new Feed story</A>
+				<BR><BR><A href='?src=[usr.UID()];mach_close=newscaster_main'>Exit</A>
 			"}
 
 			var/wanted_already = 0
@@ -261,10 +269,10 @@ var/global/nologevent = 0
 				wanted_already = 1
 
 			dat+={"<HR><B>Feed Security functions:</B><BR>
-				<BR><A href='?src=\ref[src];ac_menu_wanted=1'>[(wanted_already) ? ("Manage") : ("Publish")] \"Wanted\" Issue</A>
-				<BR><A href='?src=\ref[src];ac_menu_censor_story=1'>Censor Feed Stories</A>
-				<BR><A href='?src=\ref[src];ac_menu_censor_channel=1'>Mark Feed Channel with Nanotrasen D-Notice (disables and locks the channel.</A>
-				<BR><HR><A href='?src=\ref[src];ac_set_signature=1'>The newscaster recognises you as:<BR> <FONT COLOR='green'>[src.admincaster_signature]</FONT></A>
+				<BR><A href='?src=[UID()];ac_menu_wanted=1'>[(wanted_already) ? ("Manage") : ("Publish")] \"Wanted\" Issue</A>
+				<BR><A href='?src=[UID()];ac_menu_censor_story=1'>Censor Feed Stories</A>
+				<BR><A href='?src=[UID()];ac_menu_censor_channel=1'>Mark Feed Channel with Nanotrasen D-Notice (disables and locks the channel.</A>
+				<BR><HR><A href='?src=[UID()];ac_set_signature=1'>The newscaster recognises you as:<BR> <FONT COLOR='green'>[src.admincaster_signature]</FONT></A>
 			"}
 		if(1)
 			dat+= "Station Feed Channels<HR>"
@@ -273,38 +281,38 @@ var/global/nologevent = 0
 			else
 				for(var/datum/feed_channel/CHANNEL in news_network.network_channels)
 					if(CHANNEL.is_admin_channel)
-						dat+="<B><FONT style='BACKGROUND-COLOR: LightGreen'><A href='?src=\ref[src];ac_show_channel=\ref[CHANNEL]'>[CHANNEL.channel_name]</A></FONT></B><BR>"
+						dat+="<B><FONT style='BACKGROUND-COLOR: LightGreen'><A href='?src=[UID()];ac_show_channel=\ref[CHANNEL]'>[CHANNEL.channel_name]</A></FONT></B><BR>"
 					else
-						dat+="<B><A href='?src=\ref[src];ac_show_channel=\ref[CHANNEL]'>[CHANNEL.channel_name]</A> [(CHANNEL.censored) ? ("<FONT COLOR='red'>***</FONT>") : ()]<BR></B>"
-			dat+={"<BR><HR><A href='?src=\ref[src];ac_refresh=1'>Refresh</A>
-				<BR><A href='?src=\ref[src];ac_setScreen=[0]'>Back</A>
+						dat+="<B><A href='?src=[UID()];ac_show_channel=\ref[CHANNEL]'>[CHANNEL.channel_name]</A> [(CHANNEL.censored) ? ("<FONT COLOR='red'>***</FONT>") : ()]<BR></B>"
+			dat+={"<BR><HR><A href='?src=[UID()];ac_refresh=1'>Refresh</A>
+				<BR><A href='?src=[UID()];ac_setScreen=[0]'>Back</A>
 			"}
 
 		if(2)
 			dat+={"
 				Creating new Feed Channel...
-				<HR><B><A href='?src=\ref[src];ac_set_channel_name=1'>Channel Name</A>:</B> [src.admincaster_feed_channel.channel_name]<BR>
-				<B><A href='?src=\ref[src];ac_set_signature=1'>Channel Author</A>:</B> <FONT COLOR='green'>[src.admincaster_signature]</FONT><BR>
-				<B><A href='?src=\ref[src];ac_set_channel_lock=1'>Will Accept Public Feeds</A>:</B> [(src.admincaster_feed_channel.locked) ? ("NO") : ("YES")]<BR><BR>
-				<BR><A href='?src=\ref[src];ac_submit_new_channel=1'>Submit</A><BR><BR><A href='?src=\ref[src];ac_setScreen=[0]'>Cancel</A><BR>
+				<HR><B><A href='?src=[UID()];ac_set_channel_name=1'>Channel Name</A>:</B> [src.admincaster_feed_channel.channel_name]<BR>
+				<B><A href='?src=[UID()];ac_set_signature=1'>Channel Author</A>:</B> <FONT COLOR='green'>[src.admincaster_signature]</FONT><BR>
+				<B><A href='?src=[UID()];ac_set_channel_lock=1'>Will Accept Public Feeds</A>:</B> [(src.admincaster_feed_channel.locked) ? ("NO") : ("YES")]<BR><BR>
+				<BR><A href='?src=[UID()];ac_submit_new_channel=1'>Submit</A><BR><BR><A href='?src=[UID()];ac_setScreen=[0]'>Cancel</A><BR>
 			"}
 		if(3)
 			dat+={"
 				Creating new Feed Message...
-				<HR><B><A href='?src=\ref[src];ac_set_channel_receiving=1'>Receiving Channel</A>:</B> [src.admincaster_feed_channel.channel_name]<BR>
+				<HR><B><A href='?src=[UID()];ac_set_channel_receiving=1'>Receiving Channel</A>:</B> [src.admincaster_feed_channel.channel_name]<BR>
 				<B>Message Author:</B> <FONT COLOR='green'>[src.admincaster_signature]</FONT><BR>
-				<B><A href='?src=\ref[src];ac_set_new_message=1'>Message Body</A>:</B> [src.admincaster_feed_message.body] <BR>
-				<BR><A href='?src=\ref[src];ac_submit_new_message=1'>Submit</A><BR><BR><A href='?src=\ref[src];ac_setScreen=[0]'>Cancel</A><BR>
+				<B><A href='?src=[UID()];ac_set_new_message=1'>Message Body</A>:</B> [src.admincaster_feed_message.body] <BR>
+				<BR><A href='?src=[UID()];ac_submit_new_message=1'>Submit</A><BR><BR><A href='?src=[UID()];ac_setScreen=[0]'>Cancel</A><BR>
 			"}
 		if(4)
 			dat+={"
 					Feed story successfully submitted to [src.admincaster_feed_channel.channel_name].<BR><BR>
-					<BR><A href='?src=\ref[src];ac_setScreen=[0]'>Return</A><BR>
+					<BR><A href='?src=[UID()];ac_setScreen=[0]'>Return</A><BR>
 				"}
 		if(5)
 			dat+={"
 				Feed Channel [src.admincaster_feed_channel.channel_name] created successfully.<BR><BR>
-				<BR><A href='?src=\ref[src];ac_setScreen=[0]'>Return</A><BR>
+				<BR><A href='?src=[UID()];ac_setScreen=[0]'>Return</A><BR>
 			"}
 		if(6)
 			dat+="<B><FONT COLOR='maroon'>ERROR: Could not submit Feed story to Network.</B></FONT><HR><BR>"
@@ -312,7 +320,7 @@ var/global/nologevent = 0
 				dat+="<FONT COLOR='maroon'>Invalid receiving channel name.</FONT><BR>"
 			if(src.admincaster_feed_message.body == "" || src.admincaster_feed_message.body == "\[REDACTED\]")
 				dat+="<FONT COLOR='maroon'>Invalid message body.</FONT><BR>"
-			dat+="<BR><A href='?src=\ref[src];ac_setScreen=[3]'>Return</A><BR>"
+			dat+="<BR><A href='?src=[UID()];ac_setScreen=[3]'>Return</A><BR>"
 		if(7)
 			dat+="<B><FONT COLOR='maroon'>ERROR: Could not submit Feed Channel to Network.</B></FONT><HR><BR>"
 			if(src.admincaster_feed_channel.channel_name =="" || src.admincaster_feed_channel.channel_name == "\[REDACTED\]")
@@ -324,7 +332,7 @@ var/global/nologevent = 0
 					break
 			if(check)
 				dat+="<FONT COLOR='maroon'>Channel name already in use.</FONT><BR>"
-			dat+="<BR><A href='?src=\ref[src];ac_setScreen=[2]'>Return</A><BR>"
+			dat+="<BR><A href='?src=[UID()];ac_setScreen=[2]'>Return</A><BR>"
 		if(9)
 			dat+="<B>[src.admincaster_feed_channel.channel_name]: </B><FONT SIZE=1>\[created by: <FONT COLOR='maroon'>[src.admincaster_feed_channel.author]</FONT>\]</FONT><HR>"
 			if(src.admincaster_feed_channel.censored)
@@ -345,8 +353,8 @@ var/global/nologevent = 0
 							dat+="<img src='tmp_photo[i].png' width = '180'><BR><BR>"
 						dat+="<FONT SIZE=1>\[Story by <FONT COLOR='maroon'>[MESSAGE.author]</FONT>\]</FONT><BR>"
 			dat+={"
-				<BR><HR><A href='?src=\ref[src];ac_refresh=1'>Refresh</A>
-				<BR><A href='?src=\ref[src];ac_setScreen=[1]'>Back</A>
+				<BR><HR><A href='?src=[UID()];ac_refresh=1'>Refresh</A>
+				<BR><A href='?src=[UID()];ac_setScreen=[1]'>Back</A>
 			"}
 		if(10)
 			dat+={"
@@ -359,8 +367,8 @@ var/global/nologevent = 0
 				dat+="<I>No feed channels found active...</I><BR>"
 			else
 				for(var/datum/feed_channel/CHANNEL in news_network.network_channels)
-					dat+="<A href='?src=\ref[src];ac_pick_censor_channel=\ref[CHANNEL]'>[CHANNEL.channel_name]</A> [(CHANNEL.censored) ? ("<FONT COLOR='red'>***</FONT>") : ()]<BR>"
-			dat+="<BR><A href='?src=\ref[src];ac_setScreen=[0]'>Cancel</A>"
+					dat+="<A href='?src=[UID()];ac_pick_censor_channel=\ref[CHANNEL]'>[CHANNEL.channel_name]</A> [(CHANNEL.censored) ? ("<FONT COLOR='red'>***</FONT>") : ()]<BR>"
+			dat+="<BR><A href='?src=[UID()];ac_setScreen=[0]'>Cancel</A>"
 		if(11)
 			dat+={"
 				<B>Nanotrasen D-Notice Handler</B><HR>
@@ -372,13 +380,13 @@ var/global/nologevent = 0
 				dat+="<I>No feed channels found active...</I><BR>"
 			else
 				for(var/datum/feed_channel/CHANNEL in news_network.network_channels)
-					dat+="<A href='?src=\ref[src];ac_pick_d_notice=\ref[CHANNEL]'>[CHANNEL.channel_name]</A> [(CHANNEL.censored) ? ("<FONT COLOR='red'>***</FONT>") : ()]<BR>"
+					dat+="<A href='?src=[UID()];ac_pick_d_notice=\ref[CHANNEL]'>[CHANNEL.channel_name]</A> [(CHANNEL.censored) ? ("<FONT COLOR='red'>***</FONT>") : ()]<BR>"
 
-			dat+="<BR><A href='?src=\ref[src];ac_setScreen=[0]'>Back</A>"
+			dat+="<BR><A href='?src=[UID()];ac_setScreen=[0]'>Back</A>"
 		if(12)
 			dat+={"
 				<B>[src.admincaster_feed_channel.channel_name]: </B><FONT SIZE=1>\[ created by: <FONT COLOR='maroon'>[src.admincaster_feed_channel.author]</FONT> \]</FONT><BR>
-				<FONT SIZE=2><A href='?src=\ref[src];ac_censor_channel_author=\ref[src.admincaster_feed_channel]'>[(src.admincaster_feed_channel.author=="\[REDACTED\]") ? ("Undo Author censorship") : ("Censor channel Author")]</A></FONT><HR>
+				<FONT SIZE=2><A href='?src=[UID()];ac_censor_channel_author=\ref[src.admincaster_feed_channel]'>[(src.admincaster_feed_channel.author=="\[REDACTED\]") ? ("Undo Author censorship") : ("Censor channel Author")]</A></FONT><HR>
 			"}
 			if( isemptylist(src.admincaster_feed_channel.messages) )
 				dat+="<I>No feed messages found in channel...</I><BR>"
@@ -386,13 +394,13 @@ var/global/nologevent = 0
 				for(var/datum/feed_message/MESSAGE in src.admincaster_feed_channel.messages)
 					dat+={"
 						-[MESSAGE.body] <BR><FONT SIZE=1>\[Story by <FONT COLOR='maroon'>[MESSAGE.author]</FONT>\]</FONT><BR>
-						<FONT SIZE=2><A href='?src=\ref[src];ac_censor_channel_story_body=\ref[MESSAGE]'>[(MESSAGE.body == "\[REDACTED\]") ? ("Undo story censorship") : ("Censor story")]</A>  -  <A href='?src=\ref[src];ac_censor_channel_story_author=\ref[MESSAGE]'>[(MESSAGE.author == "\[REDACTED\]") ? ("Undo Author Censorship") : ("Censor message Author")]</A></FONT><BR>
+						<FONT SIZE=2><A href='?src=[UID()];ac_censor_channel_story_body=\ref[MESSAGE]'>[(MESSAGE.body == "\[REDACTED\]") ? ("Undo story censorship") : ("Censor story")]</A>  -  <A href='?src=[UID()];ac_censor_channel_story_author=\ref[MESSAGE]'>[(MESSAGE.author == "\[REDACTED\]") ? ("Undo Author Censorship") : ("Censor message Author")]</A></FONT><BR>
 					"}
-			dat+="<BR><A href='?src=\ref[src];ac_setScreen=[10]'>Back</A>"
+			dat+="<BR><A href='?src=[UID()];ac_setScreen=[10]'>Back</A>"
 		if(13)
 			dat+={"
 				<B>[src.admincaster_feed_channel.channel_name]: </B><FONT SIZE=1>\[ created by: <FONT COLOR='maroon'>[src.admincaster_feed_channel.author]</FONT> \]</FONT><BR>
-				Channel messages listed below. If you deem them dangerous to the station, you can <A href='?src=\ref[src];ac_toggle_d_notice=\ref[src.admincaster_feed_channel]'>Bestow a D-Notice upon the channel</A>.<HR>
+				Channel messages listed below. If you deem them dangerous to the station, you can <A href='?src=[UID()];ac_toggle_d_notice=\ref[src.admincaster_feed_channel]'>Bestow a D-Notice upon the channel</A>.<HR>
 			"}
 			if(src.admincaster_feed_channel.censored)
 				dat+={"
@@ -406,7 +414,7 @@ var/global/nologevent = 0
 					for(var/datum/feed_message/MESSAGE in src.admincaster_feed_channel.messages)
 						dat+="-[MESSAGE.body] <BR><FONT SIZE=1>\[Story by <FONT COLOR='maroon'>[MESSAGE.author]</FONT>\]</FONT><BR>"
 
-			dat+="<BR><A href='?src=\ref[src];ac_setScreen=[11]'>Back</A>"
+			dat+="<BR><A href='?src=[UID()];ac_setScreen=[11]'>Back</A>"
 		if(14)
 			dat+="<B>Wanted Issue Handler:</B>"
 			var/wanted_already = 0
@@ -418,21 +426,21 @@ var/global/nologevent = 0
 				dat+="<FONT SIZE=2><BR><I>A wanted issue is already in Feed Circulation. You can edit or cancel it below.</FONT></I>"
 			dat+={"
 				<HR>
-				<A href='?src=\ref[src];ac_set_wanted_name=1'>Criminal Name</A>: [src.admincaster_feed_message.author] <BR>
-				<A href='?src=\ref[src];ac_set_wanted_desc=1'>Description</A>: [src.admincaster_feed_message.body] <BR>
+				<A href='?src=[UID()];ac_set_wanted_name=1'>Criminal Name</A>: [src.admincaster_feed_message.author] <BR>
+				<A href='?src=[UID()];ac_set_wanted_desc=1'>Description</A>: [src.admincaster_feed_message.body] <BR>
 			"}
 			if(wanted_already)
 				dat+="<B>Wanted Issue created by:</B><FONT COLOR='green'> [news_network.wanted_issue.backup_author]</FONT><BR>"
 			else
 				dat+="<B>Wanted Issue will be created under prosecutor:</B><FONT COLOR='green'> [src.admincaster_signature]</FONT><BR>"
-			dat+="<BR><A href='?src=\ref[src];ac_submit_wanted=[end_param]'>[(wanted_already) ? ("Edit Issue") : ("Submit")]</A>"
+			dat+="<BR><A href='?src=[UID()];ac_submit_wanted=[end_param]'>[(wanted_already) ? ("Edit Issue") : ("Submit")]</A>"
 			if(wanted_already)
-				dat+="<BR><A href='?src=\ref[src];ac_cancel_wanted=1'>Take down Issue</A>"
-			dat+="<BR><A href='?src=\ref[src];ac_setScreen=[0]'>Cancel</A>"
+				dat+="<BR><A href='?src=[UID()];ac_cancel_wanted=1'>Take down Issue</A>"
+			dat+="<BR><A href='?src=[UID()];ac_setScreen=[0]'>Cancel</A>"
 		if(15)
 			dat+={"
 				<FONT COLOR='green'>Wanted issue for [src.admincaster_feed_message.author] is now in Network Circulation.</FONT><BR><BR>
-				<BR><A href='?src=\ref[src];ac_setScreen=[0]'>Return</A><BR>
+				<BR><A href='?src=[UID()];ac_setScreen=[0]'>Return</A><BR>
 			"}
 		if(16)
 			dat+="<B><FONT COLOR='maroon'>ERROR: Wanted Issue rejected by Network.</B></FONT><HR><BR>"
@@ -440,11 +448,11 @@ var/global/nologevent = 0
 				dat+="<FONT COLOR='maroon'>Invalid name for person wanted.</FONT><BR>"
 			if(src.admincaster_feed_message.body == "" || src.admincaster_feed_message.body == "\[REDACTED\]")
 				dat+="<FONT COLOR='maroon'>Invalid description.</FONT><BR>"
-			dat+="<BR><A href='?src=\ref[src];ac_setScreen=[0]'>Return</A><BR>"
+			dat+="<BR><A href='?src=[UID()];ac_setScreen=[0]'>Return</A><BR>"
 		if(17)
 			dat+={"
 				<B>Wanted Issue successfully deleted from Circulation</B><BR>
-				<BR><A href='?src=\ref[src];ac_setScreen=[0]'>Return</A><BR>
+				<BR><A href='?src=[UID()];ac_setScreen=[0]'>Return</A><BR>
 			"}
 		if(18)
 			dat+={"
@@ -458,17 +466,17 @@ var/global/nologevent = 0
 				dat+="<BR><img src='tmp_photow.png' width = '180'>"
 			else
 				dat+="None"
-			dat+="<BR><A href='?src=\ref[src];ac_setScreen=[0]'>Back</A><BR>"
+			dat+="<BR><A href='?src=[UID()];ac_setScreen=[0]'>Back</A><BR>"
 		if(19)
 			dat+={"
 				<FONT COLOR='green'>Wanted issue for [src.admincaster_feed_message.author] successfully edited.</FONT><BR><BR>
-				<BR><A href='?src=\ref[src];ac_setScreen=[0]'>Return</A><BR>
+				<BR><A href='?src=[UID()];ac_setScreen=[0]'>Return</A><BR>
 			"}
 		else
 			dat+="I'm sorry to break your immersion. This shit's bugged. Report this bug to Agouri, polyxenitopalidou@gmail.com"
 
-	//world << "Channelname: [src.admincaster_feed_channel.channel_name] [src.admincaster_feed_channel.author]"
-	//world << "Msg: [src.admincaster_feed_message.author] [src.admincaster_feed_message.body]"
+//	to_chat(world, "Channelname: [src.admincaster_feed_channel.channel_name] [src.admincaster_feed_channel.author]")
+//	to_chat(world, "Msg: [src.admincaster_feed_message.author] [src.admincaster_feed_message.body]")
 	usr << browse(dat, "window=admincaster_main;size=400x600")
 	onclose(usr, "admincaster_main")
 
@@ -481,7 +489,7 @@ var/global/nologevent = 0
 		var/r = t
 		if( findtext(r,"##") )
 			r = copytext( r, 1, findtext(r,"##") )//removes the description
-		dat += text("<tr><td>[t] (<A href='?src=\ref[src];removejobban=[r]'>unban</A>)</td></tr>")
+		dat += text("<tr><td>[t] (<A href='?src=[UID()];removejobban=[r]'>unban</A>)</td></tr>")
 	dat += "</table>"
 	usr << browse(dat, "window=ban;size=400x400")
 
@@ -491,17 +499,17 @@ var/global/nologevent = 0
 
 	var/dat = {"
 		<center><B>Game Panel</B></center><hr>\n
-		<A href='?src=\ref[src];c_mode=1'>Change Game Mode</A><br>
+		<A href='?src=[UID()];c_mode=1'>Change Game Mode</A><br>
 		"}
 	if(master_mode == "secret")
-		dat += "<A href='?src=\ref[src];f_secret=1'>(Force Secret Mode)</A><br>"
+		dat += "<A href='?src=[UID()];f_secret=1'>(Force Secret Mode)</A><br>"
 
 	dat += {"
 		<BR>
-		<A href='?src=\ref[src];create_object=1'>Create Object</A><br>
-		<A href='?src=\ref[src];quick_create_object=1'>Quick Create Object</A><br>
-		<A href='?src=\ref[src];create_turf=1'>Create Turf</A><br>
-		<A href='?src=\ref[src];create_mob=1'>Create Mob</A><br>
+		<A href='?src=[UID()];create_object=1'>Create Object</A><br>
+		<A href='?src=[UID()];quick_create_object=1'>Quick Create Object</A><br>
+		<A href='?src=[UID()];create_turf=1'>Create Turf</A><br>
+		<A href='?src=[UID()];create_mob=1'>Create Mob</A><br>
 		"}
 
 	usr << browse(dat, "window=admin2;size=210x280")
@@ -543,7 +551,7 @@ var/global/nologevent = 0
 		if(!check_rights(R_SERVER,0))
 			message = adminscrub(message,500)
 		message = replacetext(message, "\n", "<br>") // required since we're putting it in a <p> tag
-		world << "<span class=notice><b>[usr.client.holder.fakekey ? "Administrator" : usr.key] Announces:</b><p style='text-indent: 50px'>[message]</p></span>"
+		to_chat(world, "<span class=notice><b>[usr.client.holder.fakekey ? "Administrator" : usr.key] Announces:</b><p style='text-indent: 50px'>[message]</p></span>")
 		log_admin("Announce: [key_name(usr)] : [message]")
 	feedback_add_details("admin_verb","A") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
@@ -568,10 +576,10 @@ var/global/nologevent = 0
 		return
 
 	config.looc_allowed = !(config.looc_allowed)
-	if (config.looc_allowed)
-		world << "<B>The LOOC channel has been globally enabled!</B>"
+	if(config.looc_allowed)
+		to_chat(world, "<B>The LOOC channel has been globally enabled!</B>")
 	else
-		world << "<B>The LOOC channel has been globally disabled!</B>"
+		to_chat(world, "<B>The LOOC channel has been globally disabled!</B>")
 	log_and_message_admins("toggled LOOC.")
 	feedback_add_details("admin_verb","TLOOC") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
@@ -584,10 +592,10 @@ var/global/nologevent = 0
 		return
 
 	config.dsay_allowed = !(config.dsay_allowed)
-	if (config.dsay_allowed)
-		world << "<B>Deadchat has been globally enabled!</B>"
+	if(config.dsay_allowed)
+		to_chat(world, "<B>Deadchat has been globally enabled!</B>")
 	else
-		world << "<B>Deadchat has been globally disabled!</B>"
+		to_chat(world, "<B>Deadchat has been globally disabled!</B>")
 	log_admin("[key_name(usr)] toggled deadchat.")
 	message_admins("[key_name_admin(usr)] toggled deadchat.", 1)
 	feedback_add_details("admin_verb","TDSAY") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc
@@ -623,7 +631,7 @@ var/global/nologevent = 0
 		feedback_add_details("admin_verb","SN") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 		return 1
 	else
-		usr << "<font color='red'>Error: Start Now: Game has already started.</font>"
+		to_chat(usr, "<font color='red'>Error: Start Now: Game has already started.</font>")
 		return 0
 
 /datum/admins/proc/toggleenter()
@@ -635,10 +643,10 @@ var/global/nologevent = 0
 		return
 
 	enter_allowed = !( enter_allowed )
-	if (!( enter_allowed ))
-		world << "<B>New players may no longer enter the game.</B>"
+	if(!( enter_allowed ))
+		to_chat(world, "<B>New players may no longer enter the game.</B>")
 	else
-		world << "<B>New players may now enter the game.</B>"
+		to_chat(world, "<B>New players may now enter the game.</B>")
 	log_admin("[key_name(usr)] toggled new player game entering.")
 	message_admins("[key_name_admin(usr)] toggled new player game entering.", 1)
 	world.update_status()
@@ -653,10 +661,10 @@ var/global/nologevent = 0
 		return
 
 	config.allow_ai = !( config.allow_ai )
-	if (!( config.allow_ai ))
-		world << "<B>The AI job is no longer chooseable.</B>"
+	if(!( config.allow_ai ))
+		to_chat(world, "<B>The AI job is no longer chooseable.</B>")
 	else
-		world << "<B>The AI job is chooseable now.</B>"
+		to_chat(world, "<B>The AI job is chooseable now.</B>")
 	message_admins("[key_name_admin(usr)] toggled AI allowed.")
 	log_admin("[key_name(usr)] toggled AI allowed.")
 	world.update_status()
@@ -671,10 +679,10 @@ var/global/nologevent = 0
 		return
 
 	abandon_allowed = !( abandon_allowed )
-	if (abandon_allowed)
-		world << "<B>You may now respawn.</B>"
+	if(abandon_allowed)
+		to_chat(world, "<B>You may now respawn.</B>")
 	else
-		world << "<B>You may no longer respawn :(</B>"
+		to_chat(world, "<B>You may no longer respawn :(</B>")
 	message_admins("[key_name_admin(usr)] toggled respawn to [abandon_allowed ? "On" : "Off"].", 1)
 	log_admin("[key_name(usr)] toggled respawn to [abandon_allowed ? "On" : "Off"].")
 	world.update_status()
@@ -701,17 +709,17 @@ var/global/nologevent = 0
 	if(!check_rights(R_SERVER))
 		return
 
-	if (!ticker || ticker.current_state != GAME_STATE_PREGAME)
+	if(!ticker || ticker.current_state != GAME_STATE_PREGAME)
 		ticker.delay_end = !ticker.delay_end
 		log_admin("[key_name(usr)] [ticker.delay_end ? "delayed the round end" : "has made the round end normally"].")
 		message_admins("[key_name(usr)] [ticker.delay_end ? "delayed the round end" : "has made the round end normally"].", 1)
 		return //alert("Round end delayed", null, null, null, null, null)
 	going = !( going )
-	if (!( going ))
-		world << "<b>The game start has been delayed.</b>"
+	if(!( going ))
+		to_chat(world, "<b>The game start has been delayed.</b>")
 		log_admin("[key_name(usr)] delayed the game.")
 	else
-		world << "<b>The game will start soon.</b>"
+		to_chat(world, "<b>The game will start soon.</b>")
 		log_admin("[key_name(usr)] removed the delay.")
 	feedback_add_details("admin_verb","DELAY") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
@@ -720,30 +728,30 @@ var/global/nologevent = 0
 /proc/is_special_character(mob/M as mob) // returns 1 for specail characters and 2 for heroes of gamemode
 	if(!ticker || !ticker.mode)
 		return 0
-	if (!istype(M))
+	if(!istype(M))
 		return 0
 	if((M.mind in ticker.mode.head_revolutionaries) || (M.mind in ticker.mode.revolutionaries))
-		if (ticker.mode.config_tag == "revolution")
+		if(ticker.mode.config_tag == "revolution")
 			return 2
 		return 1
 	if(M.mind in ticker.mode.cult)
-		if (ticker.mode.config_tag == "cult")
-			return 2
-		return 1
-	if(M.mind in ticker.mode.malf_ai)
-		if (ticker.mode.config_tag == "malfunction")
+		if(ticker.mode.config_tag == "cult")
 			return 2
 		return 1
 	if(M.mind in ticker.mode.syndicates)
-		if (ticker.mode.config_tag == "nuclear")
+		if(ticker.mode.config_tag == "nuclear")
 			return 2
 		return 1
 	if(M.mind in ticker.mode.wizards)
-		if (ticker.mode.config_tag == "wizard")
+		if(ticker.mode.config_tag == "wizard")
 			return 2
 		return 1
 	if(M.mind in ticker.mode.changelings)
-		if (ticker.mode.config_tag == "changeling")
+		if(ticker.mode.config_tag == "changeling")
+			return 2
+		return 1
+	if(M.mind in ticker.mode.abductors)
+		if(ticker.mode.config_tag == "abduction")
 			return 2
 		return 1
 	if(isrobot(M))
@@ -799,10 +807,10 @@ var/global/nologevent = 0
 		return
 
 	if(!istype(M))
-		usr << "This can only be used on instances of type /mob"
+		to_chat(usr, "This can only be used on instances of type /mob")
 		return
 	if(!M.mind)
-		usr << "This mob has no mind!"
+		to_chat(usr, "This mob has no mind!")
 		return
 
 	M.mind.edit_memory()
@@ -817,10 +825,10 @@ var/global/nologevent = 0
 		return
 
 	guests_allowed = !( guests_allowed )
-	if (!( guests_allowed ))
-		world << "<B>Guests may no longer enter the game.</B>"
+	if(!( guests_allowed ))
+		to_chat(world, "<B>Guests may no longer enter the game.</B>")
 	else
-		world << "<B>Guests may now enter the game.</B>"
+		to_chat(world, "<B>Guests may now enter the game.</B>")
 	log_admin("[key_name(usr)] toggled guests game entering [guests_allowed?"":"dis"]allowed.")
 	message_admins("\blue [key_name_admin(usr)] toggled guests game entering [guests_allowed?"":"dis"]allowed.", 1)
 	feedback_add_details("admin_verb","TGU") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
@@ -830,25 +838,27 @@ var/global/nologevent = 0
 	for(var/mob/living/silicon/S in mob_list)
 		ai_number++
 		if(isAI(S))
-			usr << "<b>AI [key_name(S, usr)]'s laws:</b>"
+			to_chat(usr, "<b>AI [key_name(S, usr)]'s laws:</b>")
 		else if(isrobot(S))
 			var/mob/living/silicon/robot/R = S
-			usr << "<b>CYBORG [key_name(S, usr)]'s [R.connected_ai?"(Slaved to: [R.connected_ai])":"(Independent)"] laws:</b>"
-		else if (ispAI(S))
+			to_chat(usr, "<b>CYBORG [key_name(S, usr)]'s [R.connected_ai?"(Slaved to: [R.connected_ai])":"(Independent)"] laws:</b>")
+		else if(ispAI(S))
 			var/mob/living/silicon/pai/P = S
-			usr << "<b>pAI [key_name(S, usr)]'s laws:</b>"
-			usr << "[P.pai_law0]"
-			if(P.pai_laws) usr << "[P.pai_laws]"
+			to_chat(usr, "<b>pAI [key_name(S, usr)]'s laws:</b>")
+			to_chat(usr, "[P.pai_law0]")
+			if(P.pai_laws)
+				to_chat(usr, "[P.pai_laws]")
 			continue // Skip showing normal silicon laws for pAIs - they don't have any
 		else
-			usr << "<b>SILICON [key_name(S, usr)]'s laws:</b>"
+			to_chat(usr, "<b>SILICON [key_name(S, usr)]'s laws:</b>")
 
-		if (S.laws == null)
-			usr << "[key_name(S, usr)]'s laws are null. Contact a coder."
+		if(S.laws == null)
+			to_chat(usr, "[key_name(S, usr)]'s laws are null. Contact a coder.")
 		else
 			S.laws.show_laws(usr)
 	if(!ai_number)
-		usr << "<b>No AI's located.</b>" //Just so you know the thing is actually working and not just ignoring you.
+		to_chat(usr, "<b>No AI's located.</b>")//Just so you know the thing is actually working and not just ignoring you.
+
 
 	log_admin("[key_name(usr)] checked the AI laws")
 	message_admins("[key_name_admin(usr)] checked the AI laws")
@@ -874,7 +884,7 @@ var/gamma_ship_location = 1 // 0 = station , 1 = space
 /proc/move_gamma_ship()
 	var/area/fromArea
 	var/area/toArea
-	if (gamma_ship_location == 1)
+	if(gamma_ship_location == 1)
 		fromArea = locate(/area/shuttle/gamma/space)
 		toArea = locate(/area/shuttle/gamma/station)
 	else
@@ -882,16 +892,13 @@ var/gamma_ship_location = 1 // 0 = station , 1 = space
 		toArea = locate(/area/shuttle/gamma/space)
 	fromArea.move_contents_to(toArea)
 
-	for(var/turf/simulated/floor/mech_bay_recharge_floor/F in toArea)
-		F.init_devices()
-
 	for(var/obj/machinery/power/apc/A in toArea)
 		A.init()
 
 	for(var/obj/machinery/alarm/A in toArea)
 		A.first_run()
 
-	if (gamma_ship_location)
+	if(gamma_ship_location)
 		gamma_ship_location = 0
 	else
 		gamma_ship_location = 1
@@ -929,45 +936,68 @@ var/gamma_ship_location = 1 // 0 = station , 1 = space
 			if(kick_only_afk && !C.is_afk())	//Ignore clients who are not afk
 				continue
 			if(message)
-				C << message
+				to_chat(C, message)
 			kicked_client_names.Add("[C.ckey]")
 			del(C)
 	return kicked_client_names
 
 //returns 1 to let the dragdrop code know we are trapping this event
 //returns 0 if we don't plan to trap the event
-/datum/admins/proc/cmd_ghost_drag(var/mob/dead/observer/frommob, var/mob/living/tomob)
+/datum/admins/proc/cmd_ghost_drag(var/mob/dead/observer/frommob, var/tothing)
 	if(!istype(frommob))
 		return //extra sanity check to make sure only observers are shoved into things
 
 	//same as assume-direct-control perm requirements.
-	if (!check_rights(R_VAREDIT,0)) //no varedit, check if they have r_admin and r_debug
+	if(!check_rights(R_VAREDIT,0)) //no varedit, check if they have r_admin and r_debug
 		if(!check_rights(R_ADMIN|R_DEBUG,0)) //if they don't have r_admin and r_debug, return
 			return 0 //otherwise, if they have no varedit, but do have r_admin and r_debug, execute the rest of the code
 
-	if (!frommob.ckey)
+	if(!frommob.ckey)
 		return 0
 
-	var/question = ""
-	if (tomob.ckey)
-		question = "This mob already has a user ([tomob.key]) in control of it! "
-	question += "Are you sure you want to place [frommob.name]([frommob.key]) in control of [tomob.name]?"
+	if(istype(tothing, /obj/item))
+		var/mob/living/toitem = tothing
 
-	var/ask = alert(question, "Place ghost in control of mob?", "Yes", "No")
-	if (ask != "Yes")
+		var/ask = alert("Are you sure you want to allow [frommob.name]([frommob.key]) to possess [toitem.name]?", "Place ghost in control of item?", "Yes", "No")
+		if(ask != "Yes")
+			return 1
+
+		if(!frommob || !toitem) //make sure the mobs don't go away while we waited for a response
+			return 1
+
+		var/mob/living/simple_animal/possessed_object/tomob = new(toitem)
+
+		message_admins("<span class='adminnotice'>[key_name_admin(usr)] has put [frommob.ckey] in control of [tomob.name].</span>")
+		log_admin("[key_name(usr)] stuffed [frommob.ckey] into [tomob.name].")
+		feedback_add_details("admin_verb","CGD")
+
+		tomob.ckey = frommob.ckey
+		qdel(frommob)
+
+
+	if(isliving(tothing))
+		var/mob/living/tomob = tothing
+
+		var/question = ""
+		if(tomob.ckey)
+			question = "This mob already has a user ([tomob.key]) in control of it! "
+		question += "Are you sure you want to place [frommob.name]([frommob.key]) in control of [tomob.name]?"
+
+		var/ask = alert(question, "Place ghost in control of mob?", "Yes", "No")
+		if(ask != "Yes")
+			return 1
+
+		if(!frommob || !tomob) //make sure the mobs don't go away while we waited for a response
+			return 1
+
+		if(tomob.client) //no need to ghostize if there is no client
+			tomob.ghostize(0)
+
+		message_admins("<span class='adminnotice'>[key_name_admin(usr)] has put [frommob.ckey] in control of [tomob.name].</span>")
+		log_admin("[key_name(usr)] stuffed [frommob.ckey] into [tomob.name].")
+		feedback_add_details("admin_verb","CGD")
+
+		tomob.ckey = frommob.ckey
+		qdel(frommob)
+
 		return 1
-
-	if(!frommob || !tomob) //make sure the mobs don't go away while we waited for a response
-		return 1
-
-	if(tomob.client) //no need to ghostize if there is no client
-		tomob.ghostize(0)
-
-	message_admins("<span class='adminnotice'>[key_name_admin(usr)] has put [frommob.ckey] in control of [tomob.name].</span>")
-	log_admin("[key_name(usr)] stuffed [frommob.ckey] into [tomob.name].")
-	feedback_add_details("admin_verb","CGD")
-
-	tomob.ckey = frommob.ckey
-	qdel(frommob)
-
-	return 1

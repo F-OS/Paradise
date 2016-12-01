@@ -37,6 +37,7 @@
 	icon_state = "tile_grass"
 	origin_tech = "biotech=1"
 	turf_type = /turf/simulated/floor/grass
+	burn_state = FLAMMABLE
 
 /*
  * Wood
@@ -48,6 +49,7 @@
 	desc = "an easy to fit wood floor tile"
 	icon_state = "tile-wood"
 	turf_type = /turf/simulated/floor/wood
+	burn_state = FLAMMABLE
 
 /*
  * Carpets
@@ -58,6 +60,7 @@
 	desc = "A piece of carpet. It is the same size as a floor tile"
 	icon_state = "tile-carpet"
 	turf_type = /turf/simulated/floor/carpet
+	burn_state = FLAMMABLE
 
 /*
  * Plasteel
@@ -100,6 +103,7 @@
 	desc = "A piece of carpet with a convincing star pattern."
 	icon_state = "tile_space"
 	turf_type = /turf/simulated/floor/fakespace
+	burn_state = FLAMMABLE
 
 /obj/item/stack/tile/fakespace/loaded
 	amount = 30
@@ -116,3 +120,20 @@
 /obj/item/stack/tile/noslip/loaded
 	amount = 20
 
+/obj/item/stack/tile/silent
+	name = "silent tile"
+	singular_name = "silent floor tile"
+	desc = "A tile made out of tranquillite, SHHHHHHHHH!"
+	icon_state = "tile-silent"
+	origin_tech = "materials=1"
+	turf_type = /turf/simulated/floor/silent
+	mineralType = "tranquillite"
+	materials = list(MAT_TRANQUILLITE=500)
+
+//Pod floor
+/obj/item/stack/tile/pod
+	name = "pod floor tile"
+	singular_name = "pod floor tile"
+	desc = "A grooved floor tile."
+	icon_state = "tile_pod"
+	turf_type = /turf/simulated/floor/pod

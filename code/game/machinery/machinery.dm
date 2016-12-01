@@ -47,7 +47,7 @@ Class Variables:
       Currently unused.
 
 Class Procs:
-   New()                     'game/machinery/machine.dm'
+   initialize()                     'game/machinery/machine.dm'
 
    Destroy()                     'game/machinery/machine.dm'
 
@@ -116,27 +116,32 @@ Class Procs:
 	var/interact_offline = 0 // Can the machine be interacted with while de-powered.
 	var/use_log = list()
 	var/list/settagwhitelist = list()//WHITELIST OF VARIABLES THAT THE set_tag HREF CAN MODIFY, DON'T PUT SHIT YOU DON'T NEED ON HERE, AND IF YOU'RE GONNA USE set_tag (format_tag() proc), ADD TO THIS LIST.
+	atom_say_verb = "beeps"
+	var/speed_process = 0 // Process as fast as possible?
 
-/obj/machinery/New()
+/obj/machinery/initialize()
 	addAtProcessing()
-	return ..()
+	. = ..()
+	power_change()
 
 /obj/machinery/proc/addAtProcessing()
-	if (use_power)
+	if(use_power)
 		myArea = get_area_master(src)
+	if(!speed_process)
+		machine_processing += src
+	else
+		fast_processing += src
 
+/obj/machinery/New() //new
 	machines += src
-
-/obj/machinery/proc/removeAtProcessing()
-	if (myArea)
-		myArea = null
-
-	machines -= src
+	..()
 
 /obj/machinery/Destroy()
-	if (src in machines)
-		removeAtProcessing()
-
+	if(myArea)
+		myArea = null
+	fast_processing -= src
+	machine_processing -= src
+	machines -= src
 	return ..()
 
 /obj/machinery/proc/locate_machinery()
@@ -158,11 +163,11 @@ Class Procs:
 			qdel(src)
 			return
 		if(2.0)
-			if (prob(50))
+			if(prob(50))
 				qdel(src)
 				return
 		if(3.0)
-			if (prob(25))
+			if(prob(25))
 				qdel(src)
 				return
 		else
@@ -222,7 +227,7 @@ Class Procs:
 				message_admins("set_tag HREF (var attempted to edit: [href_list["set_tag"]]) exploit attempted by [key_name_admin(user)] on [src] (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[x];Y=[y];Z=[z]'>JMP</a>)")
 				return 1
 			if(!(href_list["set_tag"] in vars))
-				usr << "<span class='warning'>Something went wrong: Unable to find [href_list["set_tag"]] in vars!</span>"
+				to_chat(usr, "<span class='warning'>Something went wrong: Unable to find [href_list["set_tag"]] in vars!</span>")
 				return 1
 			var/current_tag = src.vars[href_list["set_tag"]]
 			var/newid = copytext(reject_bad_text(input(usr, "Specify the new value", src, current_tag) as null|text),1,MAX_MESSAGE_LEN)
@@ -232,20 +237,20 @@ Class Procs:
 
 		if("unlink" in href_list)
 			var/idx = text2num(href_list["unlink"])
-			if (!idx)
+			if(!idx)
 				return 1
 
 			var/obj/O = getLink(idx)
 			if(!O)
 				return 1
 			if(!canLink(O))
-				usr << "\red You can't link with that device."
+				to_chat(usr, "\red You can't link with that device.")
 				return 1
 
 			if(unlinkFrom(usr, O))
-				usr << "\blue A green light flashes on \the [P], confirming the link was removed."
+				to_chat(usr, "\blue A green light flashes on \the [P], confirming the link was removed.")
 			else
-				usr << "\red A red light flashes on \the [P].  It appears something went wrong when unlinking the two devices."
+				to_chat(usr, "\red A red light flashes on \the [P].  It appears something went wrong when unlinking the two devices.")
 			update_mt_menu=1
 
 		if("link" in href_list)
@@ -253,25 +258,25 @@ Class Procs:
 			if(!O)
 				return 1
 			if(!canLink(O,href_list))
-				usr << "\red You can't link with that device."
+				to_chat(usr, "\red You can't link with that device.")
 				return 1
-			if (isLinkedWith(O))
-				usr << "\red A red light flashes on \the [P]. The two devices are already linked."
+			if(isLinkedWith(O))
+				to_chat(usr, "\red A red light flashes on \the [P]. The two devices are already linked.")
 				return 1
 
 			if(linkWith(usr, O, href_list))
-				usr << "\blue A green light flashes on \the [P], confirming the link was added."
+				to_chat(usr, "\blue A green light flashes on \the [P], confirming the link was added.")
 			else
-				usr << "\red A red light flashes on \the [P].  It appears something went wrong when linking the two devices."
+				to_chat(usr, "\red A red light flashes on \the [P].  It appears something went wrong when linking the two devices.")
 			update_mt_menu=1
 
 		if("buffer" in href_list)
 			P.buffer = src
-			usr << "\blue A green light flashes, and the device appears in the multitool buffer."
+			to_chat(usr, "\blue A green light flashes, and the device appears in the multitool buffer.")
 			update_mt_menu=1
 
 		if("flush" in href_list)
-			usr << "\blue A green light flashes, and the device disappears from the multitool buffer."
+			to_chat(usr, "\blue A green light flashes, and the device disappears from the multitool buffer.")
 			P.buffer = null
 			update_mt_menu=1
 
@@ -324,30 +329,29 @@ Class Procs:
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-/obj/machinery/attack_ai(var/mob/user as mob)
-	if(isrobot(user))
-		// For some reason attack_robot doesn't work
-		// This is to stop robots from using cameras to remotely control machines.
-		if(user.client && user.client.eye == user)
-			return src.attack_hand(user)
+/obj/machinery/attack_ai(mob/user)
+	if(isrobot(user))// For some reason attack_robot doesn't work
+		var/mob/living/silicon/robot/R = user
+		if(R.client && R.client.eye == R && !R.low_power_mode)// This is to stop robots from using cameras to remotely control machines; and from using machines when the borg has no power.
+			return attack_hand(user)
 	else
-		return src.attack_hand(user)
+		return attack_hand(user)
 
 /obj/machinery/attack_hand(mob/user as mob)
 	if(user.lying || user.stat)
 		return 1
 
 	if(!user.IsAdvancedToolUser())
-		user << "<span class='warning'>You don't have the dexterity to do this!</span>"
+		to_chat(user, "<span class='warning'>You don't have the dexterity to do this!</span>")
 		return 1
 
-	if (ishuman(user))
+	if(ishuman(user))
 		var/mob/living/carbon/human/H = user
 		if(H.getBrainLoss() >= 60)
 			visible_message("<span class='warning'>[H] stares cluelessly at [src] and drools.</span>")
 			return 1
 		else if(prob(H.getBrainLoss()))
-			user << "<span class='warning'>You momentarily forget how to use [src].</span>"
+			to_chat(user, "<span class='warning'>You momentarily forget how to use [src].</span>")
 			return 1
 
 	if(panel_open)
@@ -361,9 +365,9 @@ Class Procs:
 
 	return ..()
 
-/obj/machinery/CheckParts()
+/obj/machinery/CheckParts(list/parts_list)
+	..()
 	RefreshParts()
-	return
 
 /obj/machinery/proc/RefreshParts() //Placeholder proc for machines that are built using frames.
 	return
@@ -384,6 +388,8 @@ Class Procs:
 				I.crit_fail = 1
 			I.forceMove(loc)
 		qdel(src)
+		return 1
+	return 0
 
 /obj/machinery/proc/default_deconstruction_screwdriver(var/mob/user, var/icon_state_open, var/icon_state_closed, var/obj/item/weapon/screwdriver/S)
 	if(istype(S))
@@ -391,11 +397,11 @@ Class Procs:
 		if(!panel_open)
 			panel_open = 1
 			icon_state = icon_state_open
-			user << "<span class='notice'>You open the maintenance hatch of [src].</span>"
+			to_chat(user, "<span class='notice'>You open the maintenance hatch of [src].</span>")
 		else
 			panel_open = 0
 			icon_state = icon_state_closed
-			user << "<span class='notice'>You close the maintenance hatch of [src].</span>"
+			to_chat(user, "<span class='notice'>You close the maintenance hatch of [src].</span>")
 		return 1
 	return 0
 
@@ -403,31 +409,20 @@ Class Procs:
 	if(panel_open && istype(W))
 		playsound(src.loc, 'sound/items/Ratchet.ogg', 50, 1)
 		dir = turn(dir,-90)
-		user << "<span class='notice'>You rotate [src].</span>"
+		to_chat(user, "<span class='notice'>You rotate [src].</span>")
 		return 1
 	return 0
 
-/obj/machinery/proc/default_unfasten_wrench(mob/user, obj/item/weapon/wrench/W, time = 20)
+/obj/proc/default_unfasten_wrench(mob/user, obj/item/weapon/wrench/W, time = 20)
 	if(istype(W))
-		user << "<span class='notice'>Now [anchored ? "un" : ""]securing [name].</span>"
+		to_chat(user, "<span class='notice'>Now [anchored ? "un" : ""]securing [name].</span>")
 		playsound(src.loc, 'sound/items/Ratchet.ogg', 50, 1)
 		if(do_after(user, time, target = src))
-			user << "<span class='notice'>You've [anchored ? "un" : ""]secured [name].</span>"
+			to_chat(user, "<span class='notice'>You've [anchored ? "un" : ""]secured [name].</span>")
 			anchored = !anchored
 			playsound(src.loc, 'sound/items/Deconstruct.ogg', 50, 1)
 		return 1
 	return 0
-
-/obj/machinery/proc/state(var/msg)
-  for(var/mob/O in hearers(src, null))
-    O.show_message("\icon[src] <span class = 'notice'>[msg]</span>", 2)
-
-/obj/machinery/proc/ping(text=null)
-  if (!text)
-    text = "\The [src] pings."
-
-  state(text, "blue")
-  playsound(src.loc, 'sound/machines/ping.ogg', 50, 0)
 
 /obj/machinery/proc/exchange_parts(mob/user, obj/item/weapon/storage/part_replacer/W)
 	var/shouldplaysound = 0
@@ -450,7 +445,7 @@ Class Procs:
 							component_parts -= A
 							component_parts += B
 							B.loc = null
-							user << "<span class='notice'>[A.name] replaced with [B.name].</span>"
+							to_chat(user, "<span class='notice'>[A.name] replaced with [B.name].</span>")
 							shouldplaysound = 1
 							break
 			RefreshParts()
@@ -463,9 +458,9 @@ Class Procs:
 		return 0
 
 /obj/machinery/proc/display_parts(mob/user)
-	user << "<span class='notice'>Following parts detected in the machine:</span>"
+	to_chat(user, "<span class='notice'>Following parts detected in the machine:</span>")
 	for(var/obj/item/C in component_parts)
-		user << "<span class='notice'>\icon[C] [C.name]</span>"
+		to_chat(user, "<span class='notice'>[bicon(C)] [C.name]</span>")
 
 /obj/machinery/examine(mob/user)
 	..(user)
@@ -544,10 +539,12 @@ Class Procs:
 		return 0
 	if(!prob(prb))
 		return 0
+	if((TK in user.mutations) && !Adjacent(user))
+		return 0
 	var/datum/effect/system/spark_spread/s = new /datum/effect/system/spark_spread
 	s.set_up(5, 1, src)
 	s.start()
-	if (electrocute_mob(user, get_area(src), src, 0.7))
+	if(electrocute_mob(user, get_area(src), src, 0.7))
 		if(user.stunned)
 			return 1
 	return 0
@@ -555,3 +552,17 @@ Class Procs:
 //called on machinery construction (i.e from frame to machinery) but not on initialization
 /obj/machinery/proc/construction()
 	return
+
+/obj/machinery/proc/can_be_overridden()
+	. = 1
+
+/obj/machinery/tesla_act(var/power)
+	..()
+	if(prob(85))
+		emp_act(2)
+	else if(prob(50))
+		ex_act(3)
+	else if(prob(90))
+		ex_act(2)
+	else
+		ex_act(1)

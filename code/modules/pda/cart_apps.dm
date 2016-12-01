@@ -96,8 +96,8 @@
 
 /datum/data/pda/app/power/update_ui(mob/user as mob, list/data)
 	update = PDA_APP_UPDATE_SLOW
-	
-	if (powmonitor && !isnull(powmonitor.powernet))
+
+	if(powmonitor && !isnull(powmonitor.powernet))
 		data["records"] = list(
 			"powerconnected" = 1,
 			"poweravail" = powmonitor.powernet.avail,
@@ -143,7 +143,7 @@
 	switch(href_list["choice"])
 		if("Records")
 			var/datum/data/record/R = locate(href_list["target"])
-			if (R && (R in data_core.general))
+			if(R && (R in data_core.general))
 				load_records(R)
 		if("Back")
 			general_records = null
@@ -175,7 +175,7 @@
 	..(R)
 	for(var/A in data_core.medical)
 		var/datum/data/record/E = A
-		if (E && (E.fields["name"] == R.fields["name"] || E.fields["id"] == R.fields["id"]))
+		if(E && (E.fields["name"] == R.fields["name"] || E.fields["id"] == R.fields["id"]))
 			medical_records = E
 			break
 
@@ -201,7 +201,7 @@
 	..(R)
 	for(var/A in data_core.security)
 		var/datum/data/record/E = A
-		if (E && (E.fields["name"] == R.fields["name"] || E.fields["id"] == R.fields["id"]))
+		if(E && (E.fields["name"] == R.fields["name"] || E.fields["id"] == R.fields["id"]))
 			security_records = E
 			break
 
@@ -226,7 +226,7 @@
 			beepskyData["botstatus"] = list("loca" = null, "mode" = -1)
 		var/botsCount=0
 		if(SC.botlist && SC.botlist.len)
-			for(var/obj/machinery/bot/B in SC.botlist)
+			for(var/mob/living/simple_animal/bot/B in SC.botlist)
 				botsCount++
 				if(B.loc)
 					botsData[++botsData.len] = list("Name" = sanitize(B.name), "Location" = sanitize(B.loc.loc.name), "ref" = "\ref[B]")
@@ -276,7 +276,7 @@
 
 
 		var/mulebotsCount=0
-		for(var/obj/machinery/bot/B in QC.botlist)
+		for(var/mob/living/simple_animal/bot/B in QC.botlist)
 			mulebotsCount++
 			if(B.loc)
 				mulebotsData[++mulebotsData.len] = list("Name" = sanitize(B.name), "Location" = sanitize(B.loc.loc.name), "ref" = "\ref[B]")
@@ -316,7 +316,7 @@
 	if(shuttle_master.supply.mode == SHUTTLE_CALL)
 		supplyData["shuttle_moving"] = 1
 
-	if(shuttle_master.supply.z != ZLEVEL_STATION)
+	if(!is_station_level(shuttle_master.supply.z))
 		supplyData["shuttle_loc"] = "station"
 	else
 		supplyData["shuttle_loc"] = "centcom"
@@ -392,7 +392,7 @@
 		BucketData[++BucketData.len] = list("x" = 0, "y" = 0, dir=null, status = null)
 
 	var/CbotData[0]
-	for(var/obj/machinery/bot/cleanbot/B in aibots)
+	for(var/mob/living/simple_animal/bot/cleanbot/B in simple_animal_list)
 		var/turf/bl = get_turf(B)
 		if(bl)
 			if(bl.z != cl.z)

@@ -10,7 +10,7 @@
 	icon_state = "multitool"
 	flags = CONDUCT
 	force = 5.0
-	w_class = 2.0
+	w_class = 2
 	throwforce = 5.0
 	throw_range = 15
 	throw_speed = 3
@@ -46,7 +46,7 @@
 
 	var/found_eye = 0
 
-	for(var/mob/aiEye/A in living_mob_list)
+	for(var/mob/camera/aiEye/A in living_mob_list)
 
 		var/turf/our_turf = get_turf(src)
 		var/turf/eye_turf = get_turf(A)

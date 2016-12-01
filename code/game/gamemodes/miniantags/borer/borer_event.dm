@@ -17,19 +17,19 @@
 /datum/event/borer_infestation/start()
 	var/list/vents = list()
 	for(var/obj/machinery/atmospherics/unary/vent_pump/temp_vent in world)
-		if((temp_vent.loc.z in config.station_levels) && !temp_vent.welded)
+		if(is_station_level(temp_vent.loc.z) && !temp_vent.welded)
 			//Stops cortical borers getting stuck in small networks. See: Security, Virology
 			if(temp_vent.parent.other_atmosmch.len > 50)
 				vents += temp_vent
 
-	var/list/candidates = get_candidates(ROLE_BORER,ALIEN_AFK_BRACKET)
-	while(spawncount > 0 && vents.len && candidates.len)
-		var/obj/vent = pick_n_take(vents)
-		var/client/C = pick_n_take(candidates)
+	spawn(0)
+		var/list/candidates = pollCandidates("Do you want to play as a cortical borer?", ROLE_BORER, 1)
+		while(spawncount > 0 && vents.len && candidates.len)
+			var/obj/vent = pick_n_take(vents)
+			var/mob/C = pick_n_take(candidates)
 
-		var/mob/living/simple_animal/borer/new_borer = new(vent.loc)
-		new_borer.key = C.key
+			var/mob/living/simple_animal/borer/new_borer = new(vent.loc)
+			new_borer.key = C.key
 
-		spawncount--
-		successSpawn = 1
-
+			spawncount--
+			successSpawn = 1

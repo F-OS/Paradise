@@ -54,7 +54,7 @@
 	return alarms
 
 /datum/alarm_handler/proc/check_alarm_cleared(var/datum/alarm/alarm)
-	if ((alarm.end_time && world.time > alarm.end_time) || !alarm.sources.len)
+	if((alarm.end_time && world.time > alarm.end_time) || !alarm.sources.len)
 		alarms -= alarm
 		alarms_assoc -= alarm.origin
 		on_alarm_change(alarm, ALARM_CLEARED)
@@ -65,7 +65,6 @@
 	for(var/obj/machinery/camera/C in alarm.cameras())
 		if(was_raised)
 			C.network.Add(category)
-			invalidateCameraCache()
 		else
 			C.network.Remove(category)
 	notify_listeners(alarm, was_raised)

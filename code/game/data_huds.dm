@@ -44,7 +44,10 @@
 	hud_icons = list(ID_HUD, IMPTRACK_HUD, IMPLOYAL_HUD, IMPCHEM_HUD, WANTED_HUD)
 
 /datum/atom_hud/data/diagnostic
-	hud_icons = list (DIAG_HUD, DIAG_STAT_HUD, DIAG_BATT_HUD, DIAG_MECH_HUD)
+	hud_icons = list (DIAG_HUD, DIAG_STAT_HUD, DIAG_BATT_HUD, DIAG_MECH_HUD, DIAG_BOT_HUD)
+
+/datum/atom_hud/data/hydroponic
+	hud_icons = list (PLANT_NUTRIENT_HUD, PLANT_WATER_HUD, PLANT_STATUS_HUD, PLANT_HEALTH_HUD, PLANT_TOXIN_HUD, PLANT_PEST_HUD, PLANT_WEED_HUD)
 
 /* MED/SEC/DIAG HUD HOOKS */
 
@@ -60,29 +63,50 @@
 
 //called when a carbon changes virus
 /mob/living/carbon/proc/check_virus()
-	for (var/ID in virus2)
-		if (ID in virusDB)
+	for(var/datum/disease/D in viruses)
+		if((!(D.visibility_flags & HIDDEN_SCANNER)) && (D.severity != NONTHREAT))
 			return 1
 	return 0
+
 //helper for getting the appropriate health status
 /proc/RoundHealth(health)
 	switch(health)
 		if(100 to INFINITY)
 			return "health100"
-		if(70 to 100)
-			return "health80"
-		if(50 to 70)
-			return "health60"
-		if(30 to 50)
-			return "health40"
-		if(18 to 30)
-			return "health25"
-		if(5 to 18)
-			return "health10"
-		if(1 to 5)
+		if(93 to 100)
+			return "health93"
+		if(86 to 93)
+			return "health86"
+		if(78 to 86)
+			return "health78"
+		if(71 to 78)
+			return "health71"
+		if(64 to 71)
+			return "health64"
+		if(56 to 64)
+			return "health56"
+		if(49 to 56)
+			return "health49"
+		if(42 to 49)
+			return "health42"
+		if(35 to 42)
+			return "health35"
+		if(28 to 35)
+			return "health28"
+		if(21 to 28)
+			return "health21"
+		if(14 to 21)
+			return "health14"
+		if(7 to 14)
+			return "health7"
+		if(1 to 7)
 			return "health1"
-		if(-99 to 0)
+		if(-50 to 1)
 			return "health0"
+		if(-85 to -50)
+			return "health-50"
+		if(-99 to -85)
+			return "health-85"
 		else
 			return "health-100"
 	return "0"
@@ -226,7 +250,7 @@
 //Borgie battery tracking!
 /mob/living/silicon/robot/proc/diag_hud_set_borgcell()
 	var/image/holder = hud_list[DIAG_BATT_HUD]
-	if (cell)
+	if(cell)
 		var/chargelvl = (cell.charge/cell.maxcharge)
 		holder.icon_state = "hudbatt[RoundDiagBar(chargelvl)]"
 	else
@@ -242,7 +266,7 @@
 
 /obj/mecha/proc/diag_hud_set_mechcell()
 	var/image/holder = hud_list[DIAG_BATT_HUD]
-	if (cell)
+	if(cell)
 		var/chargelvl = cell.charge/cell.maxcharge
 		holder.icon_state = "hudbatt[RoundDiagBar(chargelvl)]"
 	else
@@ -254,3 +278,120 @@
 	holder.icon_state = null
 	if(internal_damage)
 		holder.icon_state = "hudwarn"
+
+/*~~~~~~~~~
+	Bots!
+~~~~~~~~~~*/
+/mob/living/simple_animal/bot/proc/diag_hud_set_bothealth()
+	var/image/holder = hud_list[DIAG_HUD]
+	if(stat == DEAD)
+		holder.icon_state = "huddiagdead"
+	else
+		holder.icon_state = "huddiag[RoundDiagBar(health/maxHealth)]"
+
+/mob/living/simple_animal/bot/proc/diag_hud_set_botstat() //On (With wireless on or off), Off, EMP'ed
+	var/image/holder = hud_list[DIAG_STAT_HUD]
+	if(on)
+		holder.icon_state = "hudstat"
+	else if(stat) //Generally EMP causes this
+		holder.icon_state = "hudoffline"
+	else //Bot is off
+		holder.icon_state = "huddead2"
+
+/mob/living/simple_animal/bot/proc/diag_hud_set_botmode() //Shows a bot's current operation
+	var/image/holder = hud_list[DIAG_BOT_HUD]
+	if(client) //If the bot is player controlled, it will not be following mode logic!
+		holder.icon_state = "hudsentient"
+		return
+
+	switch(mode)
+		if(BOT_SUMMON, BOT_RESPONDING) //Responding to PDA or AI summons
+			holder.icon_state = "hudcalled"
+		if(BOT_CLEANING, BOT_REPAIRING, BOT_HEALING) //Cleanbot cleaning, Floorbot fixing, or Medibot Healing
+			holder.icon_state = "hudworking"
+		if(BOT_PATROL, BOT_START_PATROL) //Patrol mode
+			holder.icon_state = "hudpatrol"
+		if(BOT_PREP_ARREST, BOT_ARREST, BOT_HUNT, BOT_BLOCKED, BOT_NO_ROUTE) //STOP RIGHT THERE, CRIMINAL SCUM!
+			holder.icon_state = "hudalert"
+		if(BOT_MOVING, BOT_DELIVER, BOT_GO_HOME, BOT_NAV, BOT_WAIT_FOR_NAV) //Moving to target for normal bots, moving to deliver or go home for MULES.
+			holder.icon_state = "hudmove"
+		else
+			holder.icon_state = ""
+
+/*~~~~~~~~~~~~~~
+	PLANT HUD
+~~~~~~~~~~~~~~~*/
+/proc/RoundPlantBar(value)
+	switch(value * 100)
+		if(1 to 10)
+			return "10"
+		if(10 to 20)
+			return "20"
+		if(20 to 30)
+			return "30"
+		if(30 to 40)
+			return "40"
+		if(40 to 50)
+			return "50"
+		if(50 to 60)
+			return "60"
+		if(60 to 70)
+			return "70"
+		if(70 to 80)
+			return "80"
+		if(80 to 90)
+			return "90"
+		if(90 to INFINITY)
+			return "max"
+		else
+			return "zero"
+	return "zero"
+
+/obj/machinery/portable_atmospherics/hydroponics/proc/plant_hud_set_nutrient()
+	var/image/holder = hud_list[PLANT_NUTRIENT_HUD]
+	holder.icon_state = "hudnutrient[RoundPlantBar(nutrilevel/maxnutri)]"
+
+/obj/machinery/portable_atmospherics/hydroponics/proc/plant_hud_set_water()
+	var/image/holder = hud_list[PLANT_WATER_HUD]
+	holder.icon_state = "hudwater[RoundPlantBar(waterlevel/maxwater)]"
+
+/obj/machinery/portable_atmospherics/hydroponics/proc/plant_hud_set_status()
+	var/image/holder = hud_list[PLANT_STATUS_HUD]
+	if(!seed)
+		holder.icon_state = ""
+		return
+	if(harvest)
+		holder.icon_state = "hudharvest"
+		return
+	if(dead)
+		holder.icon_state = "huddead"
+		return
+	holder.icon_state = ""
+
+/obj/machinery/portable_atmospherics/hydroponics/proc/plant_hud_set_health()
+	var/image/holder = hud_list[PLANT_HEALTH_HUD]
+	if(!seed)
+		holder.icon_state = ""
+		return
+	holder.icon_state = "hudplanthealth[RoundPlantBar(health/seed.get_trait(TRAIT_ENDURANCE))]"
+
+/obj/machinery/portable_atmospherics/hydroponics/proc/plant_hud_set_toxin()
+	var/image/holder = hud_list[PLANT_TOXIN_HUD]
+	if(toxins < 1)	// You don't want to see these icons if the value is small
+		holder.icon_state = ""
+		return
+	holder.icon_state = "hudtoxin[RoundPlantBar(toxins/10)]"
+
+/obj/machinery/portable_atmospherics/hydroponics/proc/plant_hud_set_pest()
+	var/image/holder = hud_list[PLANT_PEST_HUD]
+	if(pestlevel < 1)	// You don't want to see these icons if the value is small
+		holder.icon_state = ""
+		return
+	holder.icon_state = "hudpest[RoundPlantBar(pestlevel/10)]"
+
+/obj/machinery/portable_atmospherics/hydroponics/proc/plant_hud_set_weed()
+	var/image/holder = hud_list[PLANT_WEED_HUD]
+	if(weedlevel < 1)	// You don't want to see these icons if the value is small
+		holder.icon_state = ""
+		return
+	holder.icon_state = "hudweed[RoundPlantBar(weedlevel/10)]"

@@ -7,7 +7,7 @@
 	if(!istype(M))
 		return
 
-	if(!buckled_mob && !M.buckled && !M.anchored && (M.small || prob(round(seed.get_trait(TRAIT_POTENCY)/6))))
+	if(!buckled_mob && !M.buckled && !M.anchored && ((M.mob_size <= MOB_SIZE_SMALL) || prob(round(seed.get_trait(TRAIT_POTENCY)/6))))
 		//wait a tick for the Entered() proc that called HasProximity() to finish (and thus the moving animation),
 		//so we don't appear to teleport from two tiles away when moving into a turf adjacent to vines.
 		spawn(1)
@@ -52,6 +52,6 @@
 
 	//entangling people
 	if(victim.loc == src.loc)
-		victim << "<span class='danger'>Tendrils [pick("wind", "tangle", "tighten")] around you!</span>"
+		to_chat(victim, "<span class='danger'>Tendrils [pick("wind", "tangle", "tighten")] around you!</span>")
 		can_buckle = 1
 		buckle_mob(victim)

@@ -4,8 +4,9 @@
 		////////////////
 	var/datum/admins/holder = null
 
-	var/last_message	= "" //Contains the last message sent by this client - used to protect against copy-paste spamming.
-	var/last_message_count = 0 //contins a number of how many times a message identical to last_message was sent.
+	var/last_message	= "" //contains the last message sent by this client - used to protect against copy-paste spamming.
+	var/last_message_count = 0 //contains a number of how many times a message identical to last_message was sent.
+	var/last_message_time = 0 //holds the last time (based on world.time) a message was sent
 
 		/////////
 		//OTHER//
@@ -82,3 +83,13 @@
 	control_freak = CONTROL_FREAK_ALL | CONTROL_FREAK_SKIN | CONTROL_FREAK_MACROS
 
 	var/datum/click_intercept/click_intercept = null
+
+	//datum that controls the displaying and hiding of tooltips
+	var/datum/tooltip/tooltips
+
+	// Their chat window, sort of important.
+	// See /goon/code/datums/browserOutput.dm
+	var/datum/chatOutput/chatOutput
+
+	// Donator stuff.
+	var/donator_level = DONATOR_LEVEL_NONE

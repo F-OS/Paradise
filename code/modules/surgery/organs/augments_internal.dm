@@ -34,7 +34,7 @@
 		return
 	var/stun_amount = 5 + (severity-1 ? 0 : 5)
 	owner.Stun(stun_amount)
-	owner << "<span class='warning'>Your body seizes up!</span>"
+	to_chat(owner, "<span class='warning'>Your body seizes up!</span>")
 	return stun_amount
 
 
@@ -49,7 +49,7 @@
 	implant_color = "#DE7E00"
 	slot = "brain_antidrop"
 	origin_tech = "materials=5;programming=4;biotech=4"
-	organ_action_name = "Toggle Anti-Drop"
+	actions_types = list(/datum/action/item_action/organ_action/toggle)
 
 /obj/item/organ/internal/cyberimp/brain/anti_drop/ui_action_click()
 	active = !active
@@ -71,7 +71,7 @@
 				r_hand_ignore = 0
 
 		if(!l_hand_obj && !r_hand_obj)
-			owner << "<span class='notice'>You are not holding any items, your hands relax...</span>"
+			to_chat(owner, "<span class='notice'>You are not holding any items, your hands relax...</span>")
 			active = 0
 		else
 			var/msg = 0
@@ -79,14 +79,14 @@
 			msg += !r_hand_ignore && r_hand_obj ? 2 : 0
 			switch(msg)
 				if(1)
-					owner << "<span class='notice'>Your left hand's grip tightens.</span>"
+					to_chat(owner, "<span class='notice'>Your left hand's grip tightens.</span>")
 				if(2)
-					owner << "<span class='notice'>Your right hand's grip tightens.</span>"
+					to_chat(owner, "<span class='notice'>Your right hand's grip tightens.</span>")
 				if(3)
-					owner << "<span class='notice'>Both of your hand's grips tighten.</span>"
+					to_chat(owner, "<span class='notice'>Both of your hand's grips tighten.</span>")
 	else
 		release_items()
-		owner << "<span class='notice'>Your hands relax...</span>"
+		to_chat(owner, "<span class='notice'>Your hands relax...</span>")
 		l_hand_obj = null
 		r_hand_obj = null
 
@@ -103,11 +103,11 @@
 	if(L_item)
 		A = pick(oview(range))
 		L_item.throw_at(A, range, 2)
-		owner << "<span class='notice'>Your left arm spasms and throws the [L_item.name]!</span>"
+		to_chat(owner, "<span class='notice'>Your left arm spasms and throws the [L_item.name]!</span>")
 	if(R_item)
 		A = pick(oview(range))
 		R_item.throw_at(A, range, 2)
-		owner << "<span class='notice'>Your right arm spasms and throws the [R_item.name]!</span>"
+		to_chat(owner, "<span class='notice'>Your right arm spasms and throws the [R_item.name]!</span>")
 
 /obj/item/organ/internal/cyberimp/brain/anti_drop/proc/release_items()
 	if(!l_hand_ignore && l_hand_obj in owner.contents)
@@ -116,7 +116,7 @@
 		r_hand_obj.flags ^= NODROP
 
 /obj/item/organ/internal/cyberimp/brain/anti_drop/remove(var/mob/living/carbon/M, special = 0)
-	..()
+	. = ..()
 	if(active)
 		ui_action_click()
 
@@ -133,9 +133,9 @@
 	if(crit_fail)
 		return
 	if(owner.stunned > STUN_SET_AMOUNT)
-		owner.stunned = STUN_SET_AMOUNT
+		owner.SetStunned(STUN_SET_AMOUNT)
 	if(owner.weakened > STUN_SET_AMOUNT)
-		owner.weakened = STUN_SET_AMOUNT
+		owner.SetWeakened(STUN_SET_AMOUNT)
 
 /obj/item/organ/internal/cyberimp/brain/anti_stun/emp_act(severity)
 	if(crit_fail)
@@ -143,6 +143,13 @@
 	crit_fail = 1
 	spawn(90 / severity)
 		crit_fail = 0
+
+/obj/item/organ/internal/cyberimp/brain/clown_voice
+	name = "Comical implant"
+	desc = "<span class='sans'>Uh oh.</span>"
+	implant_color = "#DEDE00"
+	slot = "brain_clownvoice"
+	origin_tech = "materials=2;biotech=2"
 
 //[[[[CHEST]]]]
 /obj/item/organ/internal/cyberimp/chest
@@ -172,7 +179,7 @@
 		return
 	if(owner.nutrition <= hunger_threshold)
 		synthesizing = 1
-		owner << "<span class='notice'>You feel less hungry...</span>"
+		to_chat(owner, "<span class='notice'>You feel less hungry...</span>")
 		owner.nutrition += 50
 		spawn(50)
 			synthesizing = 0
@@ -181,14 +188,14 @@
 	if(!owner)
 		return
 	owner.reagents.add_reagent("????",poison_amount / severity) //food poisoning
-	owner << "<span class='warning'>You feel like your insides are burning.</span>"
+	to_chat(owner, "<span class='warning'>You feel like your insides are burning.</span>")
 
 /obj/item/organ/internal/cyberimp/chest/nutriment/plus
 	name = "Nutriment pump implant PLUS"
 	desc = "This implant will synthesize and pump into your bloodstream a small amount of nutriment when you are hungry."
 	icon_state = "chest_implant"
 	implant_color = "#006607"
-	hunger_threshold = 250
+	hunger_threshold = 300
 	poison_amount = 10
 	origin_tech = "materials=5;programming=3;biotech=5"
 
@@ -246,7 +253,7 @@
 			spawn(600 / severity)
 				H.heart_attack = 0
 				if(H.stat == CONSCIOUS)
-					H << "<span class='notice'>You feel your heart beating again!</span>"
+					to_chat(H, "<span class='notice'>You feel your heart beating again!</span>")
 
 //ARM...THAT GO IN THE CHEST
 /obj/item/organ/internal/cyberimp/chest/arm_mod//dummy parent item for making arm-mod implants. works best with nodrop items that are sent to nullspace upon being dropped.
@@ -256,7 +263,7 @@
 	implant_color = "#007ACC"
 	slot = "shoulders"
 	origin_tech = "materials=5;biotech=4;powerstorage=4"
-	organ_action_name = "Toggle Arm Mod"
+	actions_types = list(/datum/action/item_action/organ_action/toggle)
 	var/obj/holder//is defined as the retractable item itself. ensure this is defined somewhere!
 	var/out = 0//determines if the item is in the owner's hand or not
 	var/overloaded = 0//is set to 1 when owner gets EMPed. if set to 1, implant doesn't work.
@@ -264,7 +271,7 @@
 
 /obj/item/organ/internal/cyberimp/chest/arm_mod/ui_action_click()
 	if(overloaded)//ensure the implant isn't broken
-		owner << "<span class='warning'>The implant doesn't respond. It seems to be broken...</span>"
+		to_chat(owner, "<span class='warning'>The implant doesn't respond. It seems to be broken...</span>")
 		return
 	if(out)//check if the owner has the item out already
 		owner.unEquip(holder, 1)//if he does, take it away. then,
@@ -280,7 +287,7 @@
 			playsound(get_turf(owner), 'sound/mecha/mechmove03.ogg', 50, 1)
 		else//if this fails to put the item in his hands,
 			holder.loc = null//keep it in nullspace
-			owner << "<span class='warning'>You can't extend [holder] if you can't use your hands!</span>"
+			to_chat(owner, "<span class='warning'>You can't extend [holder] if you can't use your hands!</span>")
 
 /obj/item/organ/internal/cyberimp/chest/arm_mod/emp_act(severity)//if the implant gets EMPed...
 	if(!owner || overloaded)//ensure that it's in an owner and that it's not already EMPed, then...
@@ -292,7 +299,7 @@
 		owner.visible_message("<span class='notice'>[holder] forcibly retracts into [owner]'s arm.</span>")
 	owner.visible_message("<span class='danger'>A loud bang comes from [owner]...</span>")
 	playsound(get_turf(owner), 'sound/effects/bang.ogg', 100, 1)
-	owner << "<span class='warning'>You feel an explosion erupt inside you as your chest implant breaks. Is it hot in here?</span>"
+	to_chat(owner, "<span class='warning'>You feel an explosion erupt inside you as your chest implant breaks. Is it hot in here?</span>")
 	owner.adjust_fire_stacks(20)
 	owner.IgniteMob()//ignite the owner, as well as
 	owner.say("AUUUUUUUUUUUUUUUUUUGH!!")
@@ -312,34 +319,43 @@
 	desc = "A variant of the arm cannon implant that fires electrodes and disabler shots. The cannon emerges from the subject's arms and remains in the shoulders when not in use."
 	icon_state = "armcannon_tase_implant"
 	origin_tech = "materials=5;combat=5;biotech=4;powerstorage=4"
-	organ_action_name = "Toggle Arm Cannon Taser"
+	actions_types = list(/datum/action/item_action/organ_action/toggle)
 
 /obj/item/organ/internal/cyberimp/chest/arm_mod/tase/New()//when the implant is created...
-	holder = new /obj/item/weapon/gun/energy/advtaser/mounted(src)//assign a brand new item to it. (in this case, a gun)
+	holder = new /obj/item/weapon/gun/energy/gun/advtaser/mounted(src)//assign a brand new item to it. (in this case, a gun)
 
 /obj/item/organ/internal/cyberimp/chest/arm_mod/lase//mounted, self-charging laser!
 	name = "Arm-cannon laser implant"
 	desc = "A variant of the arm cannon implant that fires lethal laser beams. The cannon emerges from the subject's arms and remains in the shoulders when not in use."
 	icon_state = "armcannon_lase_implant"
 	origin_tech = "materials=5;combat=5;biotech=4;powerstorage=4;syndicate=5"//this is kinda nutty and i might lower it
-	organ_action_name = "Toggle Arm Cannon Laser"
+	actions_types = list(/datum/action/item_action/organ_action/toggle)
 
 /obj/item/organ/internal/cyberimp/chest/arm_mod/lase/New()
 	holder = new /obj/item/weapon/gun/energy/laser/mounted(src)
 
 //BOX O' IMPLANTS
+
 /obj/item/weapon/storage/box/cyber_implants
-	name = "boxed cybernetic implants"
+	name = "boxed cybernetic implant"
 	desc = "A sleek, sturdy box."
 	icon_state = "cyber_implants"
+
+/obj/item/weapon/storage/box/cyber_implants/New(loc, implant)
+	..()
+	new /obj/item/device/autoimplanter(src)
+	if(ispath(implant))
+		new implant(src)
+
+/obj/item/weapon/storage/box/cyber_implants/bundle
+	name = "boxed cybernetic implants"
 	var/list/boxed = list(/obj/item/organ/internal/cyberimp/eyes/xray,/obj/item/organ/internal/cyberimp/eyes/thermals,
 						/obj/item/organ/internal/cyberimp/brain/anti_stun, /obj/item/organ/internal/cyberimp/chest/reviver)
 	var/amount = 5
 
-/obj/item/weapon/storage/box/cyber_implants/New()
+/obj/item/weapon/storage/box/cyber_implants/bundle/New()
 	..()
-	var/i
 	var/implant
-	for(i = 0, i < amount, i++)
+	while(contents.len <= amount + 1) // +1 for the autoimplanter.
 		implant = pick(boxed)
 		new implant(src)
